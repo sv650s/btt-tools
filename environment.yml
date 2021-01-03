@@ -1,0 +1,20 @@
+name: covid
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - jupyterlab
+  - matplotlib
+  - pandas
+  - seaborn
+  - geopandas
+  - numpy
+  - folium
+  - fiona
+  - branca
+  - beautifulsoup4
+  - shapely
+  - lxml
+  - pprint
+
+
