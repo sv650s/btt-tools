@@ -12,7 +12,7 @@ to run from BTT:
         set_persistent_string_variable "CoronaVirusCountry" to "THA"
     end tell
 
-    return do shell script "source ~/.bash_profile && cd ~/Dropbox/projects/COVID && conda run -n covid python get_covid_data.py COUNTRY Thailand"
+    return do shell script "source ~/.bash_profile && cd ~/Dropbox/projects/COVID && conda run -n covid python get_covid_daily_data.py COUNTRY Thailand"
 """
 #import libraries
 import json
