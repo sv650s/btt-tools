@@ -84,7 +84,8 @@ class WorldometerSource(ExternalDataSource):
 
             # drop unwanted special characters using a loop
             # TODO: do we need this?
-            # for col in table.columns[1:11]:
+            for col in table.columns[1:11]:
+                table[col] = table[col].str.replace("+", "")
             #     table[col] = table[col].str.replace("+", "").str.replace(",", "").str.replace(" ", "")
             log.debug(f'Old column names: {table.columns}')
             self._renamed_columns(table)
