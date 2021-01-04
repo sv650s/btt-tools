@@ -27,9 +27,6 @@ from util.htmlparser import HTMLTableParser
 
 if __name__ == "__main__":
 
-    url = ""
-    filter_column = ""
-
     parser = argparse.ArgumentParser(description='Get COVID daily data from Worldometer')
     parser.add_argument('data_source', metavar='Mode', type=str,
                         help='Mode to run in. Current supports: CA or COUNTRY')
