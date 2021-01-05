@@ -26,7 +26,7 @@ class NewsParser(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_url(self):
         """
-        get URL to parse articles from
+        get URL to parse arts from
         :return:
         """
         pass
@@ -34,10 +34,21 @@ class NewsParser(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def parse_articles(self) -> list:
         """
-        parses articles once we have the soup object
+        parses arts once we have the soup object
 
         :param article_number:
-        :return: a list of articles
+        :return: a list of arts
+        """
+        pass
+
+
+    @abc.abstractmethod
+    def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
+        """
+        formats an article object
+        :param a:
+        :param max_length:
+        :return:
         """
         pass
 
@@ -62,6 +73,17 @@ class BKKPostParser(NewsParser):
 
         return [a]
 
+    def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
+        """
+        returns headline, summary, and link in 3 different lines
+        :param a:
+        :param max_length:
+        :param kwargs:
+        :return:
+        """
+        return f'{a.headline}\n{a.summary}'
+
+
 class SFGateParser(NewsParser):
 
     def get_url(self):
@@ -81,5 +103,20 @@ class SFGateParser(NewsParser):
 
 
         return articles
+
+    def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
+        summary = a.summary
+        if len(summary) > max_length and max_length != 0:
+            # split into lines one and two
+
+            last_space_idx = summary[0:max_length].rfind(' ')
+
+            line1 = summary[0:last_space_idx]
+            line2 = summary[last_space_idx + 1:]  # +1 to get rid of space
+            return f'{line1}\n{line2}'
+        else:
+            return summary
+
+
 
 

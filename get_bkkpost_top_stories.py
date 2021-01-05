@@ -1,6 +1,6 @@
 import logging
 import argparse
-from util.newparser import SFGateParser
+from util.newparser import BKKPostParser
 
 
 log = logging.getLogger(__name__)
@@ -16,22 +16,22 @@ if __name__ == "__main__":
     parser.add_argument('--log_level', default="ERROR", help='Specify logging level. Default ERROR')
     args = parser.parse_args()
 
-    article_num = args.article_num
-    # max length of first line
-    max_length = args.max_length
+    if args.log_level is not None:
+        log_level = getattr(logging, args.log_level.upper(), None)
+    logging.basicConfig(level=log_level)
+    log = logging.getLogger(__name__)
+
+    parser = BKKPostParser()
 
     try:
-        if args.log_level is not None:
-            log_level = getattr(logging, args.log_level.upper(), None)
-        logging.basicConfig(level=log_level)
-        log = logging.getLogger(__name__)
+        articles = parser.get_articles()
 
-        parser = SFGateParser()
-        arts = parser.get_articles()
-
-        log.debug(f'article count: {len(arts)}')
-
-        print(parser.format_article(arts[article_num % len(arts)],
-              max_length), end="")
+        log.debug(articles[0])
+        if len(articles) > 0:
+            print(parser.format_article(articles[0]), end='')
+        else:
+            print("No articles found", end='')
     except:
-        print("SFGate Error", end='')
+        print("BBK Post Error", end='')
+
+
