@@ -1,7 +1,4 @@
-import requests
-from bs4 import BeautifulSoup
 import logging
-import pandas as pd
 import argparse
 from util.newparser import BKKPostParser
 
@@ -24,17 +21,6 @@ if __name__ == "__main__":
 
     parser = BKKPostParser()
     articles = parser.get_articles()
-
-    # # get homepage
-    # url = 'http://bangkokpost.com'
-    # response = requests.get(url)
-    # data = response.content.decode('utf-8')
-    # soup = BeautifulSoup(response.text, 'lxml')
-    #
-    # top_stories = soup.find(attrs={"class": 'home-highlights'})
-    #
-    # summary = top_stories.find("p").get_text()
-    # headline = top_stories.find(attrs={"class": "cx-exclude-id"}).get_text()
 
     a = articles[0]
 

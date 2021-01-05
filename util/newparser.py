@@ -12,6 +12,12 @@ class Article:
         self.summary = None
         self.link = None
 
+    def __str__(self):
+        return (f'Article:\n'
+                  f'\theadline: {self.headline}\n'
+                  f'\tsummary: {self.summary}\n'
+                  f'\tlink: {self.link}')
+
 class NewsParser(metaclass=abc.ABCMeta):
 
     def __init__(self):
@@ -56,9 +62,24 @@ class BKKPostParser(NewsParser):
 
         return [a]
 
+class SFGateParser(NewsParser):
+
+    def get_url(self):
+        return "http://sfgate.com"
+
+    def parse_articles(self) -> list:
+        articles = []
+        spotlights = self.soup.find_all(attrs={"class": "dynamicSpotlight--item-header hdn-analytics"}, href=True)
+
+        log.debug(f"spotlights length: {len(spotlights)}")
+        for s in spotlights:
+            a = Article()
+            a.summary = s.get_text()
+            a.link = f'{self.get_url()}/{s["href"]}'
+
+            articles.append(a)
 
 
-
-
+        return articles
 
 

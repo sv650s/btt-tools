@@ -1,8 +1,6 @@
-import requests
-from bs4 import BeautifulSoup
 import logging
-import pandas as pd
 import argparse
+from util.newparser import SFGateParser
 
 
 log = logging.getLogger(__name__)
@@ -11,31 +9,32 @@ log = logging.getLogger(__name__)
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Get top headline from Bangkok Post')
-    parser.add_argument('--mode', metavar='Get Mode', type=str, default='all', required=True,
-                        help='What do you want to get? headline, summary, all')
+    parser.add_argument('--article_num', metavar='Article Number', type=int, default=1,
+                        help='Which article to display')
     parser.add_argument('--log_level', default="ERROR", help='Specify logging level. Default ERROR')
     args = parser.parse_args()
+
+    article_num = args.article_num
+    # max length of first line
+    max_length = 35
 
     if args.log_level is not None:
         log_level = getattr(logging, args.log_level.upper(), None)
     logging.basicConfig(level=log_level)
     log = logging.getLogger(__name__)
 
-    # get homepage
-    url = 'http://bangkokpost.com'
-    response = requests.get(url)
-    data = response.content.decode('utf-8')
-    soup = BeautifulSoup(response.text, 'lxml')
+    parser = SFGateParser()
+    articles = parser.get_articles()
 
-    top_stories = soup.find(attrs={"class": 'home-highlights'})
+    summary = articles[article_num % len(articles)].summary
+    if len(summary) > max_length:
+        # split into lines one and two
 
-    summary = top_stories.find("p").get_text()
-    headline = top_stories.find(attrs={"class": "cx-exclude-id"}).get_text()
+        last_space_idx = summary[0:max_length].rfind(' ')
 
-    if args.mode == "headline":
-        print(f'{headline}', end='')
-    elif args.mode == "summary":
-        print(f'{summary}', end='')
+        line1 = summary[0:last_space_idx]
+        line2 = summary[last_space_idx + 1:] # +1 to get rid of space
+        print(f'{line1}\n{line2}')
     else:
-        print(f'{headline}\n{summary}', end='')
+        print(summary)
 
