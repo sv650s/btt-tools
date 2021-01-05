@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import logging
 import pandas as pd
 import argparse
-from util.newparser import BKKPostParser
 
 
 log = logging.getLogger(__name__)
@@ -22,26 +21,21 @@ if __name__ == "__main__":
     logging.basicConfig(level=log_level)
     log = logging.getLogger(__name__)
 
-    parser = BKKPostParser()
-    articles = parser.get_articles()
+    # get homepage
+    url = 'http://bangkokpost.com'
+    response = requests.get(url)
+    data = response.content.decode('utf-8')
+    soup = BeautifulSoup(response.text, 'lxml')
 
-    # # get homepage
-    # url = 'http://bangkokpost.com'
-    # response = requests.get(url)
-    # data = response.content.decode('utf-8')
-    # soup = BeautifulSoup(response.text, 'lxml')
-    #
-    # top_stories = soup.find(attrs={"class": 'home-highlights'})
-    #
-    # summary = top_stories.find("p").get_text()
-    # headline = top_stories.find(attrs={"class": "cx-exclude-id"}).get_text()
+    top_stories = soup.find(attrs={"class": 'home-highlights'})
 
-    a = articles[0]
+    summary = top_stories.find("p").get_text()
+    headline = top_stories.find(attrs={"class": "cx-exclude-id"}).get_text()
 
     if args.mode == "headline":
-        print(f'{a.headline}', end='')
+        print(f'{headline}', end='')
     elif args.mode == "summary":
-        print(f'{a.summary}', end='')
+        print(f'{summary}', end='')
     else:
-        print(f'{a.headline}\n{a.summary}', end='')
+        print(f'{headline}\n{summary}', end='')
 
