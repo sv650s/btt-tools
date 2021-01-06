@@ -10,9 +10,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Get top headline from Bangkok Post')
     parser.add_argument('--article_num', metavar='Article Number', type=int, default=1,
-                        help='Which article to display')
-    parser.add_argument('--max_length', metavar='Maximum Length', type=int, default=40,
-                        help='Maximum line length before we try to split')
+                        help='Which a to display')
     parser.add_argument('--log_level', default="ERROR", help='Specify logging level. Default ERROR')
     args = parser.parse_args()
 
@@ -21,22 +19,20 @@ if __name__ == "__main__":
     logging.basicConfig(level=log_level)
     log = logging.getLogger(__name__)
 
-    max_length = args.max_length
     article_num = args.article_num
 
     parser = BKKPostParser()
 
     try:
-        articles = parser.get_info()
+        articles = parser.get()
 
         log.debug(f'articles length: {len(articles)}')
         if len(articles) > 0:
-            print(parser.format_article(articles[article_num % len(articles)]), end='')
+            print(parser.format(articles[article_num % len(articles)]), end='')
         else:
             print("No articles found", end='')
 
     except Exception as e:
-        print("BBK Post Error", end='')
-        log.error(e)
+        print(f"BBK Post Error {e}")
 
 

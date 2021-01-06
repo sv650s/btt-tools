@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Get AQI information for BKK')
     parser.add_argument('--article_num', metavar='Article Number', type=int, default=1,
-                        help='Which article to display')
+                        help='Which a to display')
     parser.add_argument('--max_length', metavar='Maximum Length', type=int, default=40,
                         help='Maximum line length before we try to split')
     parser.add_argument('--log_level', default="ERROR", help='Specify logging level. Default ERROR')
@@ -27,13 +27,12 @@ if __name__ == "__main__":
         log = logging.getLogger(__name__)
 
         parser = AQICNParser()
-        arts = parser.get_info()
+        arts = parser.get()
 
-        log.debug(f'article count: {len(arts)}')
+        log.debug(f'a count: {len(arts)}')
         log.debug(f'arts: {arts}')
 
-        print(parser.format_article(arts[0],
-              max_length), end="")
+        print(parser.format(arts[0]), end="")
     except Exception as e:
         print("AQICN Error", end='')
         print(e)

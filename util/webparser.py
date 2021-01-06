@@ -8,15 +8,18 @@ log = logging.getLogger(__name__)
 class Article:
 
     def __init__(self,
+                 source: str = None,
                  headline: str = None,
                  summary: str = None,
                  link: str = None):
+        self.source = source
         self.headline = headline
         self.summary = summary
         self.link = link
 
     def __str__(self):
         return (f'Article:\n'
+                f'\source: {self.source}\n'
                   f'\theadline: {self.headline}\n'
                   f'\tsummary: {self.summary}\n'
                   f'\tlink: {self.link}')
@@ -35,6 +38,16 @@ class WebParser(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def get_source(self) -> str:
+        """
+        get common name for source
+        :return:
+        """
+        pass
+
+
+
+    @abc.abstractmethod
     def parse_list_from_page(self) -> list:
         """
         parses arts once we have the soup object
@@ -44,18 +57,30 @@ class WebParser(metaclass=abc.ABCMeta):
         """
         pass
 
-
-    @abc.abstractmethod
-    def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
+    def format_link(self, new_link: str) -> str:
         """
-        formats an article object
+        formats the link we get from page into a full path
+        default implementaton puts the get_url() in front
+        :param new_link:
+        :return:
+        """
+        return f'{self.get_url()}{new_link}'
+
+
+    def format(self, a:Article, **kwargs) -> str:
+        """
+        formats an a object
         :param a:
         :param max_length:
         :return:
         """
-        pass
+        return f'{a.source}|{a.summary}|{a.link}'
 
-    def get_info(self):
+    def get(self) -> list:
+        """
+
+        :return: list of articles from source
+        """
         response = requests.get(self.get_url())
         response.content.decode('utf-8')
         self.soup = BeautifulSoup(response.text, 'lxml')
@@ -67,12 +92,16 @@ class BKKPostParser(WebParser):
     def get_url(self):
         return "http://bangkokpost.com"
 
+    def get_source(self) -> str:
+        return "BKK"
+
     def parse_list_from_page(self) -> list:
         articles = []
 
         # get top story
         a = Article()
         top_stories = self.soup.find(attrs={"class": 'home-highlights'})
+        a.source = self.get_source()
         a.summary = top_stories.find("p").get_text()
         a.headline = top_stories.find(attrs={"class": "cx-exclude-id"}).get_text()
         a.link = top_stories.find(attrs={"class": "cx-exclude-id"})['href']
@@ -82,41 +111,39 @@ class BKKPostParser(WebParser):
 
         # get highlights
         highlights = self.soup.find(attrs={"class": "article-highlights-side"})
-        detail_list = highlights.find_all(attrs={"class": "list-detail"})
-        for i in detail_list:
-            href = i.find(attrs={"class": "cx-exclude-id"})
-            headline = href.get_text()
-            link = href['href']
-            summary = i.find('p').get_text()
 
-            a = Article(headline, summary, link)
-            articles.append(a)
+        if highlights is not None:
+            detail_list = highlights.find_all(attrs={"class": "list-detail"})
+            for i in detail_list:
+                href = i.find(attrs={"class": "cx-exclude-id"})
+                headline = href.get_text()
+                link = self.format_link(href["href"])
+                summary = i.find('p').get_text()
 
-            log.debug(f'headline: {headline}')
-            log.debug(f'summary: {summary}')
-            log.debug(f'link: {link}\n\n')
+                a = Article(self.get_source(), headline, summary, link)
+                articles.append(a)
+
+                log.debug(f'headline: {headline}')
+                log.debug(f'summary: {summary}')
+                log.debug(f'link: {link}\n\n')
+        else:
+            a = Article(source=self.get_source(),
+                        headline="BKK Error",
+                        summary="BKK Error",
+                        link=self.get_url())
 
 
         return articles
 
-    def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
-        """
-        returns headline, summary, and link in 3 different lines
-        :param a:
-        :param max_length:
-        :param kwargs:
-        :return:
-        """
-        # return f'{a.headline}\n{a.summary}'
-
-        return f'{a.summary}|{self.get_url()}{a.link}'
-        # return a.summary
 
 
 class SFGateParser(WebParser):
 
     def get_url(self):
         return "http://sfgate.com"
+
+    def get_source(self) -> str:
+        return "SFGate"
 
     def parse_list_from_page(self) -> list:
         articles = []
@@ -125,16 +152,15 @@ class SFGateParser(WebParser):
         log.debug(f"spotlights length: {len(spotlights)}")
         for s in spotlights:
             a = Article()
+            a.source = self.get_source()
             a.summary = s.get_text()
-            a.link = f'{self.get_url()}/{s["href"]}'
+            a.link = self.format_link(s['href'])
 
             articles.append(a)
 
 
         return articles
 
-    def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
-        return f'{a.summary}|{self.get_url()}{a.link}'
 
 
 class AQICNParser(WebParser):
@@ -142,14 +168,17 @@ class AQICNParser(WebParser):
     def get_url(self):
         return "http://aqicn.org/city/thailand/bangkok/chulalongkorn-hospital"
 
+    def get_source(self) -> str:
+        return "AQICN"
+
     def parse_list_from_page(self) -> list:
         aqi_number = self.soup.find(attrs={"class": 'aqivalue'}).get_text()
         aqi_info = self.soup.find(attrs={"id": 'aqiwgtinfo'}).get_text()
-        a = Article(aqi_number, aqi_info)
+        a = Article(self.get_source(), aqi_number, aqi_info)
         log.debug(f'a: {a}')
         return [a]
 
-    def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
+    def format(self, a:Article, **kwargs) -> str:
         # output for BTT
         # "{\"text\":\"newTitle\",
         # \"icon_data\": \"base64_icon_data\",
@@ -166,6 +195,9 @@ class BBCWorldNewsParser(WebParser):
     def get_url(self):
         return "https://www.bbc.com/news/world"
 
+    def get_source(self) -> str:
+        return "BBC"
+
     def parse_list_from_page(self) -> list:
         articles = []
 
@@ -175,9 +207,10 @@ class BBCWorldNewsParser(WebParser):
         main_summary = self.soup.find(attrs={"class":
                              "gs-c-promo-summary gel-long-primer gs-u-mt nw-c-promo-summary"}).get_text()
         top_article = Article(
+            source = self.get_source(),
             headline = main_headline_and_link.get_text(),
             summary = main_summary,
-            link = main_headline_and_link['href']
+            link = self.format_link(main_headline_and_link['href'])
         )
         articles.append(top_article)
         log.debug(f'Top news story: {articles[0]}')
@@ -199,15 +232,21 @@ class BBCWorldNewsParser(WebParser):
 
         idx = 0
         for href in other_headline_href:
-            a = Article(headline = href.get_text(),
-                                    summary = other_summary_p[0].get_text(),
-                                    link = f'{self.get_url()}/{href["href"]}')
-            log.debug(f'added article: {a}')
+            a = Article(source = self.get_source(),
+                headline = href.get_text(),
+                summary = other_summary_p[0].get_text(),
+                link = self.format_link(href['href']))
+            log.debug(f'added a: {a}')
             articles.append(a)
             idx += 1
 
 
         return articles
 
-    def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
-        return f'{a.headline}|{self.get_url()}{a.link}'
+    def format_link(self, new_link: str) -> str:
+        """
+        override default implementation since get_url is not the base domain for BBC
+        :param new_link:
+        :return:
+        """
+        return f'http://www.bbc.com{new_link}'

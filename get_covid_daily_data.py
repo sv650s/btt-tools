@@ -61,4 +61,5 @@ if __name__ == "__main__":
     values = data_fetcher.get_data()
 
 
-    print(f"2DA: {values[0]}\nYDA: {values[1]}", end="")
+    print(f"{values[0]}|{values[1]}", end="")
+    # print(f"2DA: {values[0]}\nYDA: {values[1]}", end="")
