@@ -29,8 +29,17 @@ class Article:
 
 class WebParser(metaclass=abc.ABCMeta):
 
-    def __init__(self):
+    def __init__(self,
+                 include_headline = True,
+                 include_summary = True):
+        """
+
+        :param include_headline: do you want to include headline in the formatted output
+        :param include_summary:  do you want to include summary in the formatted output. If both are specified a '-' will separate them
+        """
         self.soup = None
+        self.include_headline = include_headline
+        self.include_summary = include_summary
 
     @abc.abstractmethod
     def get_url(self):
@@ -87,7 +96,14 @@ class WebParser(metaclass=abc.ABCMeta):
         :param max_length:
         :return:
         """
-        return f'{a.source}|{a.summary}|{a.domain}|{a.link}'
+        if self.include_headline is True and self.include_summary is True:
+            output = f'{a.source}|{a.headline} - {a.summary}|{a.domain}|{a.link}'
+        elif self.include_headline is True:
+            output = f'{a.source}|{a.headline}|{a.domain}|{a.link}'
+        else:
+            output = f'{a.source}|{a.summary}|{a.domain}|{a.link}'
+
+        return output
 
     def get(self) -> list:
         """
@@ -99,6 +115,16 @@ class WebParser(metaclass=abc.ABCMeta):
         self.soup = BeautifulSoup(response.text, 'lxml')
 
         return self.parse_list_from_page()
+
+    def new_article(self):
+        """
+        creats an article with source and domain already populated
+        :return:
+        """
+        a = Article(source=self.get_source(),
+                    domain=self.get_domain())
+        return a
+
 
 class BKKPostParser(WebParser):
 
