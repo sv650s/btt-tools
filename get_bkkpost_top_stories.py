@@ -1,6 +1,6 @@
 import logging
 import argparse
-from util.newparser import BKKPostParser
+from util.webparser import BKKPostParser
 
 
 log = logging.getLogger(__name__)
@@ -21,17 +21,22 @@ if __name__ == "__main__":
     logging.basicConfig(level=log_level)
     log = logging.getLogger(__name__)
 
+    max_length = args.max_length
+    article_num = args.article_num
+
     parser = BKKPostParser()
 
     try:
-        articles = parser.get_articles()
+        articles = parser.get_info()
 
-        log.debug(articles[0])
+        log.debug(f'articles length: {len(articles)}')
         if len(articles) > 0:
-            print(parser.format_article(articles[0]), end='')
+            print(parser.format_article(articles[article_num % len(articles)]), end='')
         else:
             print("No articles found", end='')
-    except:
+
+    except Exception as e:
         print("BBK Post Error", end='')
+        log.error(e)
 
 

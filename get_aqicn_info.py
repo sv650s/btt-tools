@@ -1,6 +1,6 @@
 import logging
 import argparse
-from util.webparser import SFGateParser
+from util.webparser import AQICNParser
 
 
 log = logging.getLogger(__name__)
@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Get top headline from Bangkok Post')
+    parser = argparse.ArgumentParser(description='Get AQI information for BKK')
     parser.add_argument('--article_num', metavar='Article Number', type=int, default=1,
                         help='Which article to display')
     parser.add_argument('--max_length', metavar='Maximum Length', type=int, default=40,
@@ -26,13 +26,14 @@ if __name__ == "__main__":
         logging.basicConfig(level=log_level)
         log = logging.getLogger(__name__)
 
-        parser = SFGateParser()
+        parser = AQICNParser()
         arts = parser.get_info()
 
         log.debug(f'article count: {len(arts)}')
+        log.debug(f'arts: {arts}')
 
-        print(parser.format_article(arts[article_num % len(arts)],
+        print(parser.format_article(arts[0],
               max_length), end="")
     except Exception as e:
-        print("SFGate Error", end='')
+        print("AQICN Error", end='')
         print(e)
