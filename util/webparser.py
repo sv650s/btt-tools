@@ -109,17 +109,8 @@ class BKKPostParser(WebParser):
         """
         # return f'{a.headline}\n{a.summary}'
 
-        summary = a.summary
-        if len(summary) > max_length and max_length != 0:
-            # split into lines one and two
-
-            last_space_idx = summary[0:max_length].rfind(' ')
-
-            line1 = summary[0:last_space_idx]
-            line2 = summary[last_space_idx + 1:]  # +1 to get rid of space
-            return f'{line1}\n{line2}'
-        else:
-            return summary
+        return f'{a.summary}|{self.get_url()}{a.link}'
+        # return a.summary
 
 
 class SFGateParser(WebParser):
@@ -143,28 +134,19 @@ class SFGateParser(WebParser):
         return articles
 
     def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
-        summary = a.summary
-        if len(summary) > max_length and max_length != 0:
-            # split into lines one and two
-
-            last_space_idx = summary[0:max_length].rfind(' ')
-
-            line1 = summary[0:last_space_idx]
-            line2 = summary[last_space_idx + 1:]  # +1 to get rid of space
-            return f'{line1}\n{line2}'
-        else:
-            return summary
+        return f'{a.summary}|{self.get_url()}{a.link}'
 
 
 class AQICNParser(WebParser):
 
     def get_url(self):
-        return "http://aqicn.org/city/bangkok"
+        return "http://aqicn.org/city/thailand/bangkok/chulalongkorn-hospital"
 
     def parse_list_from_page(self) -> list:
         aqi_number = self.soup.find(attrs={"class": 'aqivalue'}).get_text()
         aqi_info = self.soup.find(attrs={"id": 'aqiwgtinfo'}).get_text()
         a = Article(aqi_number, aqi_info)
+        log.debug(f'a: {a}')
         return [a]
 
     def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
@@ -176,6 +158,56 @@ class AQICNParser(WebParser):
         # \"font_color\": \"100,200,100,255\",
         # \"font_size\": 10}"
 
-        return f'AQI: {a.headline}\n{a.summary}'
+        return f'{a.headline}'
 
 
+class BBCWorldNewsParser(WebParser):
+
+    def get_url(self):
+        return "https://www.bbc.com/news/world"
+
+    def parse_list_from_page(self) -> list:
+        articles = []
+
+        # get top story
+        main_headline_and_link = self.soup.find(attrs={
+            "class": "gs-c-promo-heading gs-o-faux-block-link__overlay-link gel-paragon-bold gs-u-mt+ nw-o-link-split__anchor"})
+        main_summary = self.soup.find(attrs={"class":
+                             "gs-c-promo-summary gel-long-primer gs-u-mt nw-c-promo-summary"}).get_text()
+        top_article = Article(
+            headline = main_headline_and_link.get_text(),
+            summary = main_summary,
+            link = main_headline_and_link['href']
+        )
+        articles.append(top_article)
+        log.debug(f'Top news story: {articles[0]}')
+
+
+        # get other articles
+        other_news_block = self.soup.find(attrs={"class":
+                                   "gel-layout gel-layout--equal"})
+
+        other_headline_href = other_news_block.find_all(attrs={"class":
+                                                              "gs-c-promo-heading gs-o-faux-block-link__overlay-link gel-pica-bold nw-o-link-split__anchor"})
+        other_summary_p = other_news_block.find_all('p')
+        # using this method, we also get the summary of main headline - need to remove it
+        other_summary_p.pop(0)
+
+        log.debug(f'top headline count: {len(other_headline_href)}')
+        log.debug(f'top summary count: {len(other_summary_p)}')
+
+
+        idx = 0
+        for href in other_headline_href:
+            a = Article(headline = href.get_text(),
+                                    summary = other_summary_p[0].get_text(),
+                                    link = f'{self.get_url()}/{href["href"]}')
+            log.debug(f'added article: {a}')
+            articles.append(a)
+            idx += 1
+
+
+        return articles
+
+    def format_article(self, a:Article, max_length: int = 30, **kwargs) -> str:
+        return f'{a.headline}|{self.get_url()}{a.link}'
