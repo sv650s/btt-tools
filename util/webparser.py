@@ -11,10 +11,12 @@ class Article:
                  source: str = None,
                  headline: str = None,
                  summary: str = None,
+                 domain: str = None,
                  link: str = None):
         self.source = source
         self.headline = headline
         self.summary = summary
+        self.domain = domain
         self.link = link
 
     def __str__(self):
@@ -22,6 +24,7 @@ class Article:
                 f'\source: {self.source}\n'
                   f'\theadline: {self.headline}\n'
                   f'\tsummary: {self.summary}\n'
+                f'\tdomain:  {self.domain}\n'
                   f'\tlink: {self.link}')
 
 class WebParser(metaclass=abc.ABCMeta):
@@ -33,6 +36,16 @@ class WebParser(metaclass=abc.ABCMeta):
     def get_url(self):
         """
         get URL to parse arts from
+        :return:
+        """
+        pass
+
+    @abc.abstractmethod
+    def get_domain(self):
+        """
+        get domain of website
+        used by BTT so we don't open up a bunch of tabs
+        Example: bbc.com
         :return:
         """
         pass
@@ -74,7 +87,7 @@ class WebParser(metaclass=abc.ABCMeta):
         :param max_length:
         :return:
         """
-        return f'{a.source}|{a.summary}|{a.link}'
+        return f'{a.source}|{a.summary}|{a.domain}|{a.link}'
 
     def get(self) -> list:
         """
@@ -92,6 +105,9 @@ class BKKPostParser(WebParser):
     def get_url(self):
         return "http://bangkokpost.com"
 
+    def get_domain(self):
+        return "bangkokpost.com"
+
     def get_source(self) -> str:
         return "BKK"
 
@@ -102,6 +118,7 @@ class BKKPostParser(WebParser):
         a = Article()
         top_stories = self.soup.find(attrs={"class": 'home-highlights'})
         a.source = self.get_source()
+        a.domain = self.get_domain()
         a.summary = top_stories.find("p").get_text()
         a.headline = top_stories.find(attrs={"class": "cx-exclude-id"}).get_text()
         a.link = top_stories.find(attrs={"class": "cx-exclude-id"})['href']
@@ -120,7 +137,7 @@ class BKKPostParser(WebParser):
                 link = self.format_link(href["href"])
                 summary = i.find('p').get_text()
 
-                a = Article(self.get_source(), headline, summary, link)
+                a = Article(self.get_source(), headline, summary, self.get_domain(), link)
                 articles.append(a)
 
                 log.debug(f'headline: {headline}')
@@ -130,6 +147,7 @@ class BKKPostParser(WebParser):
             a = Article(source=self.get_source(),
                         headline="BKK Error",
                         summary="BKK Error",
+                        domain=self.get_domain(),
                         link=self.get_url())
 
 
@@ -142,6 +160,9 @@ class SFGateParser(WebParser):
     def get_url(self):
         return "http://sfgate.com"
 
+    def get_domain(self):
+        return "sfgate.com"
+
     def get_source(self) -> str:
         return "SFGate"
 
@@ -153,6 +174,7 @@ class SFGateParser(WebParser):
         for s in spotlights:
             a = Article()
             a.source = self.get_source()
+            a.domain = self.get_domain()
             a.summary = s.get_text()
             a.link = self.format_link(s['href'])
 
@@ -168,13 +190,18 @@ class AQICNParser(WebParser):
     def get_url(self):
         return "http://aqicn.org/city/thailand/bangkok/chulalongkorn-hospital"
 
+    def get_domain(self):
+        return "aqicn.org"
+
     def get_source(self) -> str:
         return "AQICN"
 
     def parse_list_from_page(self) -> list:
         aqi_number = self.soup.find(attrs={"class": 'aqivalue'}).get_text()
         aqi_info = self.soup.find(attrs={"id": 'aqiwgtinfo'}).get_text()
-        a = Article(self.get_source(), aqi_number, aqi_info)
+        a = Article(self.get_source(),
+                    headline=aqi_number,
+                    summary=aqi_info)
         log.debug(f'a: {a}')
         return [a]
 
@@ -195,6 +222,9 @@ class BBCWorldNewsParser(WebParser):
     def get_url(self):
         return "https://www.bbc.com/news/world"
 
+    def get_domain(self):
+        return "bbc.com"
+
     def get_source(self) -> str:
         return "BBC"
 
@@ -210,6 +240,7 @@ class BBCWorldNewsParser(WebParser):
             source = self.get_source(),
             headline = main_headline_and_link.get_text(),
             summary = main_summary,
+            domain = self.get_domain(),
             link = self.format_link(main_headline_and_link['href'])
         )
         articles.append(top_article)
@@ -233,9 +264,10 @@ class BBCWorldNewsParser(WebParser):
         idx = 0
         for href in other_headline_href:
             a = Article(source = self.get_source(),
-                headline = href.get_text(),
-                summary = other_summary_p[0].get_text(),
-                link = self.format_link(href['href']))
+                        headline = href.get_text(),
+                        summary = other_summary_p[0].get_text(),
+                        domain = self.get_domain(),
+                        link = self.format_link(href['href']))
             log.debug(f'added a: {a}')
             articles.append(a)
             idx += 1
