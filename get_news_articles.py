@@ -4,6 +4,10 @@ from util.webparser import SFGateParser, BBCWorldNewsParser
 from util.rss import RSSParser, RSSFormatter
 
 # TODO: implement this class and combine all parsers
+# TODO: add the following feeds
+# "https://www.independent.co.uk/news/world/rss"
+# https://martinfowler.com/feed.atom - this is a atom format and not rss
+# https://finance.yahoo.com/news/rssindex
 
 
 log = logging.getLogger(__name__)
@@ -32,27 +36,34 @@ if __name__ == "__main__":
     # try:
         # define your news sources here
     parsers = [
-               RSSParser("BKK",
-                          "https://www.bangkokpost.com/rss/data/topstories.xml",
-                          "bangkokpost.com"),
-                RSSParser("BBC",
-                          "http://feeds.bbci.co.uk/news/video_and_audio/world/rss.xml",
-                          "bbc.com"),
-                RSSParser(
-                          "NYT",
-                          "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
-                          "nytimes.com"),
-                RSSParser(
-                          "SFGate",
-                          "https://www.sfgate.com/bayarea/feed/Bay-Area-News-429.php",
-                          "sfgate.com",
-                            include_headline = True,
-                          include_summary = True),
+        RSSParser("BKK",
+                  "https://www.bangkokpost.com/rss/data/topstories.xml",
+                  "bangkokpost.com"),
+        RSSParser("BBC",
+                  "http://feeds.bbci.co.uk/news/video_and_audio/world/rss.xml",
+                  "bbc.com"),
+        RSSParser(
+                  "NYT",
+                  "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+                  "nytimes.com"),
+        RSSParser(
+                  "SFGate",
+                  "https://www.sfgate.com/bayarea/feed/Bay-Area-News-429.php",
+                  "sfgate.com",
+                    include_headline = True,
+                  include_summary = True),
         RSSParser(
             "NPR",
             "https://feeds.npr.org/510355/podcast.xml",
             "npr.org"
-        )
+        ),
+        RSSParser("TC",
+                  "http://feeds.feedburner.com/Techcrunch",
+                  "techcrunch.com",
+                  link_field='comments'),
+        RSSParser("YHOO",
+                  "https://www.yahoo.com/news/rss",
+                  "news.yahoo.com")
         ]
     formatter = RSSFormatter()
     # list of list of articles from all sources

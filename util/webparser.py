@@ -8,11 +8,11 @@ log = logging.getLogger(__name__)
 class Article:
 
     def __init__(self,
-                 source: str = None,
-                 headline: str = None,
-                 summary: str = None,
-                 domain: str = None,
-                 link: str = None):
+                 source: str = '',
+                 headline: str = '',
+                 summary: str = '',
+                 domain: str = '',
+                 link: str = ''):
         self.source = source
         self.headline = headline
         self.summary = summary

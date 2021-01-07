@@ -41,6 +41,9 @@ class RSSParser(WebParser):
                  url: str,
                  domain: str,
                  limit: int = 10,
+                 headline_field = 'title',
+                 summary_field = 'description',
+                 link_field = 'link',
                  **kwargs
                  ):
         """
@@ -49,6 +52,9 @@ class RSSParser(WebParser):
         :param url: url or the article
         :param domain: domain of site - used to prevent BTT from opening too many tabs
         :param limit: limits # of articles per source
+        :param headline_field: field in XML to get headline info
+        :param summary_field: field in XML to get summary
+        :param link_field: field in XML to get link
         :param kwargs: pass variables to parent constructor
         """
         # root of the XML
@@ -57,6 +63,9 @@ class RSSParser(WebParser):
         self.url = url
         self.domain = domain
         self.limit = limit
+        self.headline_field = headline_field
+        self.summary_field = summary_field
+        self.link_field = link_field
         super(RSSParser, self).__init__()
 
         # this has been moved to RSSFormatter - but keeping it here for reference
@@ -98,9 +107,18 @@ class RSSParser(WebParser):
             if counter < self.limit:
                 #     print(f'tag: {a.tag}, attrib: {a.attrib}')
                 a = self.new_article()
-                a.headline = item.find('title').text
-                a.link = item.find('link').text
-                a.summary = item.find('description').text
+                headline = item.find(self.headline_field)
+                if headline is not None:
+                    log.debug(f'headline: {headline}')
+                    a.headline = headline.text
+                link = item.find(self.link_field)
+                if link is not None:
+                    log.debug(f'link: {link}')
+                    a.link = link.text
+                summary = item.find(self.summary_field)
+                if summary is not None:
+                    log.debug(f'summary: {summary}')
+                    a.summary = summary.text
 
                 log.debug(a)
                 articles.append(a)
