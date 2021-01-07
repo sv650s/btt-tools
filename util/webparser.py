@@ -31,7 +31,7 @@ class WebParser(metaclass=abc.ABCMeta):
 
     def __init__(self,
                  include_headline = True,
-                 include_summary = True):
+                 include_summary = True ):
         """
 
         :param include_headline: do you want to include headline in the formatted output

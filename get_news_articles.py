@@ -29,54 +29,60 @@ if __name__ == "__main__":
     logging.basicConfig(level=log_level)
     log = logging.getLogger(__name__)
 
-    try:
+    # try:
         # define your news sources here
-        parsers = [
-                   RSSParser("BKK",
-                              "https://www.bangkokpost.com/rss/data/topstories.xml",
-                              "bangkokpost.con"),
-                    RSSParser("BBC",
-                              "http://feeds.bbci.co.uk/news/video_and_audio/world/rss.xml",
-                              "bbc.com"),
-                    RSSParser(
-                              "NYT",
-                              "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
-                              "nytimes.com"),
-                    RSSParser(
-                              "SFGate",
-                              "https://www.sfgate.com/bayarea/feed/Bay-Area-News-429.php",
-                              "sfgate.com",
-                              include_summary = False)
-            ]
-        # list of list of articles from all sources
-        master_articles = {}
+    parsers = [
+               RSSParser("BKK",
+                          "https://www.bangkokpost.com/rss/data/topstories.xml",
+                          "bangkokpost.com"),
+                RSSParser("BBC",
+                          "http://feeds.bbci.co.uk/news/video_and_audio/world/rss.xml",
+                          "bbc.com"),
+                RSSParser(
+                          "NYT",
+                          "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+                          "nytimes.com"),
+                RSSParser(
+                          "SFGate",
+                          "https://www.sfgate.com/bayarea/feed/Bay-Area-News-429.php",
+                          "sfgate.com",
+                            include_headline = True,
+                          include_summary = True)
+        ]
+    # list of list of articles from all sources
+    master_articles = {}
 
-        max_articles_length = 0
-        for parser in parsers:
+    max_articles_length = 0
+    for parser in parsers:
+        try:
             articles = parser.get()
             max_articles_length = max_articles_length if max_articles_length > len(articles) else len(articles)
             master_articles[parser] = articles
+        except Exception as e:
+            log.debug(f"Error getting from parser: {parser}")
+            log.debug(e)
 
-        log.debug(f'max_articles_length {max_articles_length}')
 
-        formatted_articles = []
-        # flatten a list
-        count = 0
+    log.debug(f'max_articles_length {max_articles_length}')
 
-        while count < max_articles_length:
-            for parser in master_articles.keys():
-                articles = master_articles[parser]
-                idx = count % len(articles)
-                a = articles[idx]
-                formatted_articles.append(parser.format(a))
-                log.debug(f'adding: {parser.format(a)}')
-            count += 1
+    formatted_articles = []
+    # flatten a list
+    count = 0
 
-        log.debug(f'total aggregated articles: {len(formatted_articles)}')
-        log.debug(f'{formatted_articles}')
+    while count < max_articles_length:
+        for parser in master_articles.keys():
+            articles = master_articles[parser]
+            idx = count % len(articles)
+            a = articles[idx]
+            formatted_articles.append(parser.format(a))
+            log.debug(f'adding: {parser.format(a)}')
+        count += 1
 
-        # get right article and print to output
-        print(formatted_articles[article_num % len(formatted_articles)], end='')
+    log.debug(f'total aggregated articles: {len(formatted_articles)}')
+    log.debug(f'{formatted_articles}')
 
-    except Exception as e:
-        print(f"Error Retrieving News: {e}", '')
+    # get right article and print to output
+    print(formatted_articles[article_num % len(formatted_articles)], end='')
+
+    # except Exception as e:
+    #     print(f"Error Retrieving News: {e}", '')
