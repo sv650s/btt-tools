@@ -1,6 +1,6 @@
 import logging
 import argparse
-from util.rss import RSSParser
+from util.rss import RSSParser, RSSFormatter
 
 
 log = logging.getLogger(__name__)
@@ -24,13 +24,14 @@ if __name__ == "__main__":
     parser = RSSParser("BKK",
                        "https://www.bangkokpost.com/rss/data/topstories.xml",
                       "bangkokpost.con")
+    formatter =  RSSFormatter()
 
     try:
         articles = parser.get()
 
         log.debug(f'articles length: {len(articles)}')
         if len(articles) > 0:
-            print(parser.format(articles[article_num % len(articles)]), end='')
+            print(formatter.format(articles[article_num % len(articles)]), end='')
         else:
             print("No articles found", end='')
 

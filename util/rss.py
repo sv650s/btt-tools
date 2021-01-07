@@ -9,7 +9,7 @@ SFGate: https://www.sfgate.com/bayarea/feed/Bay-Area-News-429.php
 
 """
 
-from util.webparser import Article, WebParser
+from util.webparser import Article, WebParser, PipeArticleFormatter
 import xml.etree.ElementTree as ET
 import requests
 import abc
@@ -19,6 +19,18 @@ import re
 
 log = logging.getLogger(__name__)
 
+class RSSFormatter(PipeArticleFormatter):
+
+    def format(self, a: Article, **kwargs) -> str:
+        # this is removing the entire headline from SFgate for some reason
+        clean = re.compile('<.*?>')
+
+        if a.headline is not None:
+            a.headline = re.sub(clean, '', a.headline).replace('"', '').strip()
+        if a.summary is not None:
+            a.summary = re.sub(clean, '', a.summary).replace('"', '').strip()
+
+        return super(RSSFormatter, self).format(a)
 
 
 # TODO: use pubDate to filter out old articles
@@ -37,7 +49,7 @@ class RSSParser(WebParser):
         :param url: url or the article
         :param domain: domain of site - used to prevent BTT from opening too many tabs
         :param limit: limits # of articles per source
-        :param kwargs:
+        :param kwargs: pass variables to parent constructor
         """
         # root of the XML
         self.root = None
@@ -46,11 +58,13 @@ class RSSParser(WebParser):
         self.domain = domain
         self.limit = limit
         super(RSSParser, self).__init__()
-        if "include_headline" in kwargs.keys():
-            self.include_headline = kwargs.pop('include_headline')
-        if "include_summary" in kwargs.keys():
-            self.include_summary = kwargs.pop('include_summary')
-        log.debug(f'include_headline: {self.include_headline} include_summary: {self.include_summary}')
+
+        # this has been moved to RSSFormatter - but keeping it here for reference
+        # if "include_headline" in kwargs.keys():
+        #     self.include_headline = kwargs.pop('include_headline')
+        # if "include_summary" in kwargs.keys():
+        #     self.include_summary = kwargs.pop('include_summary')
+        # log.debug(f'include_headline: {self.include_headline} include_summary: {self.include_summary}')
 
     def get(self) -> list:
         """
@@ -95,17 +109,4 @@ class RSSParser(WebParser):
                 break
 
         return articles
-
-    def format(self, a:Article, **kwargs) -> str:
-        # this is removing the entire headline from SFgate for some reason
-        clean = re.compile('<.*?>')
-
-        if a.headline is not None:
-            a.headline = re.sub(clean, '', a.headline).strip()
-            # a.headline = a.headline.replace("<p>","").strip()
-        if a.summary is not None:
-            # a.summary = a.summary.replace("<p>","")
-            a.summary = re.sub(clean, '', a.summary).strip()
-
-        return super(RSSParser, self).format(a)
 

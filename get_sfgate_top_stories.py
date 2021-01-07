@@ -1,6 +1,7 @@
 import logging
 import argparse
-from util.webparser import SFGateParser
+from util.webparser import SFGateParser, PipeArticleFormatter
+
 
 
 log = logging.getLogger(__name__)
@@ -23,10 +24,11 @@ if __name__ == "__main__":
         log = logging.getLogger(__name__)
 
         parser = SFGateParser()
+        formatter = PipeArticleFormatter()
         arts = parser.get()
 
         log.debug(f'a count: {len(arts)}')
 
-        print(parser.format(arts[article_num % len(arts)]), end="")
+        print(formatter.format(arts[article_num % len(arts)]), end="")
     except Exception as e:
         print(f"SFGate Error: {e}")

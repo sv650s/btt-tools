@@ -27,19 +27,45 @@ class Article:
                 f'\tdomain:  {self.domain}\n'
                   f'\tlink: {self.link}')
 
-class WebParser(metaclass=abc.ABCMeta):
+
+class ArticleFormatter(metaclass=abc.ABCMeta):
 
     def __init__(self,
                  include_headline = True,
-                 include_summary = True ):
+                 include_summary = True):
+        self.include_headline = include_headline
+        self.include_summary = include_summary
+
+    def format(self, a: Article, **kwargs) -> str:
+        pass
+
+class PipeArticleFormatter(ArticleFormatter):
+
+    def format(self, a:Article, **kwargs) -> str:
+        """
+        formats an a object
+        :param a:
+        :param max_length:
+        :return:
+        """
+        if self.include_headline is True and self.include_summary is True:
+            output = f'{a.source}|{a.headline}|{a.summary}|{a.domain}|{a.link}'
+        elif self.include_headline is True:
+            output = f'{a.source}|{a.headline}||{a.domain}|{a.link}'
+        else:
+            output = f'{a.source}||{a.summary}|{a.domain}|{a.link}'
+
+        return output
+
+class WebParser(metaclass=abc.ABCMeta):
+
+    def __init__(self):
         """
 
         :param include_headline: do you want to include headline in the formatted output
         :param include_summary:  do you want to include summary in the formatted output. If both are specified a '-' will separate them
         """
         self.soup = None
-        self.include_headline = include_headline
-        self.include_summary = include_summary
 
     @abc.abstractmethod
     def get_url(self):
@@ -88,22 +114,6 @@ class WebParser(metaclass=abc.ABCMeta):
         """
         return f'{self.get_url()}{new_link}'
 
-
-    def format(self, a:Article, **kwargs) -> str:
-        """
-        formats an a object
-        :param a:
-        :param max_length:
-        :return:
-        """
-        if self.include_headline is True and self.include_summary is True:
-            output = f'{a.source}|{a.headline} - {a.summary}|{a.domain}|{a.link}'
-        elif self.include_headline is True:
-            output = f'{a.source}|{a.headline}|{a.domain}|{a.link}'
-        else:
-            output = f'{a.source}|{a.summary}|{a.domain}|{a.link}'
-
-        return output
 
     def get(self) -> list:
         """

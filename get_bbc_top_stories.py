@@ -1,6 +1,6 @@
 import logging
 import argparse
-from util.webparser import BBCWorldNewsParser
+from util.webparser import BBCWorldNewsParser, PipeArticleFormatter
 
 
 log = logging.getLogger(__name__)
@@ -25,8 +25,10 @@ if __name__ == "__main__":
         parser = BBCWorldNewsParser()
         arts = parser.get()
 
+        formatter = PipeArticleFormatter()
+
         log.debug(f'a count: {len(arts)}')
 
-        print(parser.format(arts[article_num % len(arts)]), end="")
+        print(formatter.format(arts[article_num % len(arts)]), end="")
     except Exception as e:
         print(f"SFGate Error: {e}")

@@ -1,7 +1,7 @@
 import logging
 import argparse
 from util.webparser import SFGateParser, BBCWorldNewsParser
-from util.rss import RSSParser
+from util.rss import RSSParser, RSSFormatter
 
 # TODO: implement this class and combine all parsers
 
@@ -47,8 +47,14 @@ if __name__ == "__main__":
                           "https://www.sfgate.com/bayarea/feed/Bay-Area-News-429.php",
                           "sfgate.com",
                             include_headline = True,
-                          include_summary = True)
+                          include_summary = True),
+        RSSParser(
+            "NPR",
+            "https://feeds.npr.org/510355/podcast.xml",
+            "npr.org"
+        )
         ]
+    formatter = RSSFormatter()
     # list of list of articles from all sources
     master_articles = {}
 
@@ -74,8 +80,8 @@ if __name__ == "__main__":
             articles = master_articles[parser]
             idx = count % len(articles)
             a = articles[idx]
-            formatted_articles.append(parser.format(a))
-            log.debug(f'adding: {parser.format(a)}')
+            formatted_articles.append(formatter.format(a))
+            log.debug(f'{count} adding: {formatter.format(a)}')
         count += 1
 
     log.debug(f'total aggregated articles: {len(formatted_articles)}')
