@@ -79,5 +79,5 @@ class RSSParser(WebParser):
         return articles
 
     def format(self, a:Article, **kwargs) -> str:
-        return f'{a.source}|{a.headline} - {a.summary}|{a.domain}|{a.link}'
+        return f'{a.source}|{a.headline} - {a.summary.replace("<p>","")}|{a.domain}|{a.link}'
 
