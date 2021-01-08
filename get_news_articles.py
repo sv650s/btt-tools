@@ -1,6 +1,5 @@
 import logging
 import argparse
-from util.webparser import SFGateParser, BBCWorldNewsParser
 from util.rss import RSSParser, RSSFormatter
 
 # TODO: implement this class and combine all parsers

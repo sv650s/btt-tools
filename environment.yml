@@ -1,4 +1,4 @@
-name: covid
+name: btt
 channels:
   - conda-forge
   - defaults
@@ -9,7 +9,6 @@ dependencies:
   - numpy
   - jupyterlab
   - pandas
-  - pprint
   - seaborn
 
 
