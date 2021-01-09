@@ -20,7 +20,7 @@ import numpy as np
 import requests, io
 import logging
 import argparse
-from util.datasource import CountryWorldometerSource, CAWorldometerSource
+from util.datasource import CountryWorldometerSource, CAWorldometerSource, ThailandCovidSource
 
 from util.htmlparser import HTMLTableParser
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
                         help='Mode to run in. Current supports: CA or COUNTRY')
     parser.add_argument('row_filter_value', metavar='Row Fitler Value', type=str,
                         help='If COUNTRY mode, this is the country name - ie, Thailand. If CA mode, this is the county name -ie San Francisco')
-    parser.add_argument('column_filter', metavar='Column filter', type=str, default='newcases',
+    parser.add_argument('--column_filter', metavar='Column filter', type=str, default='newcases',
                         help='What column do you want to get the data -ie, newcases')
     parser.add_argument('--log_level', default="ERROR", help='Specify logging level. Default ERROR')
     parser.add_argument('--default_fill_value', metavar="Default Fill Value", default='N/A', type=str,
@@ -52,7 +52,11 @@ if __name__ == "__main__":
     data_fetcher = None
 
     if data_source == "COUNTRY":
-        data_fetcher = CountryWorldometerSource(row_filter_value, column_filter, default_fill_value)
+        if row_filter_value == "THA":
+            # data_fetcher = ThailandCovidSource()
+            data_fetcher = CountryWorldometerSource(row_filter_value, column_filter, default_fill_value)
+        else:
+            data_fetcher = CountryWorldometerSource(row_filter_value, column_filter, default_fill_value)
     elif data_source == "CA":
         data_fetcher = CAWorldometerSource(row_filter_value, column_filter, default_fill_value)
     else:
@@ -60,6 +64,16 @@ if __name__ == "__main__":
 
     values = data_fetcher.get_data()
 
+    log.debug(f'values length: {len(values)}')
+    output = ""
+    index = 0
+    for val in values:
+        if index == 0:
+            output = val
+        else:
+            output = f'{output}|{val}'
+        index += 1
 
-    print(f"{values[0]}|{values[1]}", end="")
-    # print(f"2DA: {values[0]}\nYDA: {values[1]}", end="")
+
+
+    print(output, end="")
