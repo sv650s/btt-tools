@@ -23,12 +23,14 @@ class RSSFormatter(PipeArticleFormatter):
 
     def format(self, a: Article, **kwargs) -> str:
         # this is removing the entire headline from SFgate for some reason
-        clean = re.compile('<.*?>')
+        cleanHTMLTags = re.compile('<.*?>')
+        cleanHTMLSymbols = re.compile('\[[a-z0-9;]?\]')
+        # TODO: add this to the stripping
 
         if a.headline is not None:
-            a.headline = re.sub(clean, '', a.headline).replace('"', '').strip()
+            a.headline = re.sub(cleanHTMLTags, '', a.headline).replace('"', '').strip()
         if a.summary is not None:
-            a.summary = re.sub(clean, '', a.summary).replace('"', '').strip()
+            a.summary = re.sub(cleanHTMLTags, '', a.summary).replace('"', '').strip()
 
         return super(RSSFormatter, self).format(a)
 

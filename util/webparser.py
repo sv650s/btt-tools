@@ -12,12 +12,14 @@ class Article:
                  headline: str = '',
                  summary: str = '',
                  domain: str = '',
+                 publishDate: str = '',
                  link: str = ''):
         self.source = source
         self.headline = headline
         self.summary = summary
         self.domain = domain
         self.link = link
+        self.publishDate = publishDate
 
     def __str__(self):
         return (f'Article:\n'
@@ -25,8 +27,8 @@ class Article:
                   f'\theadline: {self.headline}\n'
                   f'\tsummary: {self.summary}\n'
                 f'\tdomain:  {self.domain}\n'
-                  f'\tlink: {self.link}')
-
+                  f'\tlink: {self.link}\n'
+                f'\tpublishDate: {self.publishDate}')
 
 class ArticleFormatter(metaclass=abc.ABCMeta):
 
