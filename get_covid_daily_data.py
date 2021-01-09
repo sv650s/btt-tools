@@ -28,12 +28,14 @@ from util.htmlparser import HTMLTableParser
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Get COVID daily data from Worldometer')
-    parser.add_argument('data_source', metavar='Mode', type=str,
+    parser.add_argument('mode', metavar='Mode', type=str,
                         help='Mode to run in. Current supports: CA or COUNTRY')
     parser.add_argument('row_filter_value', metavar='Row Fitler Value', type=str,
                         help='If COUNTRY mode, this is the country name - ie, Thailand. If CA mode, this is the county name -ie San Francisco')
     parser.add_argument('--column_filter', metavar='Column filter', type=str, default='newcases',
                         help='What column do you want to get the data -ie, newcases')
+    parser.add_argument('--source', metavar='Data Source', type=str, default='worldometer',
+                        help='What source to get the data: worldometer, th-stat')
     parser.add_argument('--log_level', default="ERROR", help='Specify logging level. Default ERROR')
     parser.add_argument('--default_fill_value', metavar="Default Fill Value", default='N/A', type=str,
                         help='Replace blank columns with this. Default: N/A')
@@ -44,20 +46,25 @@ if __name__ == "__main__":
     logging.basicConfig(level=loglevel)
     log = logging.getLogger(__name__)
 
-    data_source = args.data_source
+    mode = args.mode
+    source = args.source
     column_filter = args.column_filter # newcases
     row_filter_value = args.row_filter_value # USA
     default_fill_value = args.default_fill_value
 
     data_fetcher = None
 
-    if data_source == "COUNTRY":
-        if row_filter_value == "THA":
-            # data_fetcher = ThailandCovidSource()
-            data_fetcher = CountryWorldometerSource(row_filter_value, column_filter, default_fill_value)
+    if mode == "COUNTRY":
+        if row_filter_value == "Thailand":
+            if source == "worldometer":
+                data_fetcher = CountryWorldometerSource(row_filter_value, column_filter, default_fill_value)
+            else:
+                data_fetcher = ThailandCovidSource(row_filter=row_filter_value,
+                                                   column_filter=column_filter,
+                                                   default_value = default_fill_value)
         else:
             data_fetcher = CountryWorldometerSource(row_filter_value, column_filter, default_fill_value)
-    elif data_source == "CA":
+    elif mode == "CA":
         data_fetcher = CAWorldometerSource(row_filter_value, column_filter, default_fill_value)
     else:
         raise Exception("Unknown Mode")

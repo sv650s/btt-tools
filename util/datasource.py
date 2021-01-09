@@ -215,6 +215,13 @@ class ThailandCovidSource(ExternalDataSource):
                  row_filter: str, # county
                  default_fill_value:str = 'N/A'):
     """
+    def __init__(self,
+                 row_filter: str,
+                 column_filter: str,
+                 default_value: str):
+        self.row_filter = row_filter
+        self.column_filter = column_filter
+        self.default_value = default_value
 
     def get_data(self) -> list:
         # get homepage
@@ -224,11 +231,16 @@ class ThailandCovidSource(ExternalDataSource):
 
         # cant quite load into DF yet.. there is an outter element Data that we need to get out of JSON
         parsedJson = json.loads(data)
-        df = pd.DataFrame.from_dict(parsedJson['Data'])
+        # 2021-01-08 20:32:07
+        self.last_data = datetime.datetime.fromisoformat(parsedJson['LastData'])
+        # 08/01/2021
+        self.update_date = datetime.datetime.strptime(parsedJson['UpdateDate'], '%d/%m/%Y')
+        log.debug(f'last_data: {self.last_data} update_date: {self.update_date}')
+        covid_df = pd.DataFrame.from_dict(parsedJson['Data'])
         # convert confirmDate to datetime column
 
-        self._cleanup_data(df)
-        return self._filter_date(df)
+        self._cleanup_data(covid_df)
+        return self._filter_data(covid_df)
 
     def _filter_data(self, df:pd.DataFrame) -> pd.DataFrame:
         """
@@ -245,10 +257,19 @@ class ThailandCovidSource(ExternalDataSource):
         yesterday = today - datetime.timedelta(days=1)
         log.debug(f'yesterday: {yesterday}')
 
-        today_new_count = len(df[df.ConfirmDate > today])
-        yesterday_new_count = len(df[(df.ConfirmDate > yesterday) & (df.ConfirmDate < today)])
+        if self.last_data > today:
+            today_new_count = len(df[df.ConfirmDate > today])
+            today_bkk_new_count = len(df[(df.ConfirmDate > today) & (df.ProvinceEn == "Bangkok")])
+        else:
+            today_new_count = self.default_value
+            today_bkk_new_count = self.default_value
 
-        today_bkk_new_count = len(df[(df.ConfirmDate > yesterday) & (df.ProvinceEn == "Bangkok")])
+            wdosource = CountryWorldometerSource(self.row_filter, self.column_filter, self.default_value)
+            wdo_values = wdosource.get_data()
+            if len(wdo_values) >= 1 and wdo_values[0] != "N/A":
+                today_new_count = wdo_values[0]
+
+        yesterday_new_count = len(df[(df.ConfirmDate > yesterday) & (df.ConfirmDate < today)])
         yesterday_bkk_new_count = len(df[(df.ConfirmDate > yesterday) & (df.ConfirmDate < today) & (df.ProvinceEn == "Bangkok")])
 
         return [today_new_count,
@@ -256,7 +277,7 @@ class ThailandCovidSource(ExternalDataSource):
                 yesterday_new_count,
                 yesterday_bkk_new_count]
 
-    def _clean_up_date(self, df:pd.DataFrame) -> pd.DataFrame:
+    def _cleanup_data(self, df:pd.DataFrame) -> pd.DataFrame:
         # convert date ConfirmDate into datetime
         df['ConfirmDate'] = df['ConfirmDate'].astype('datetime64[ns]')
         # TODO: convert provinces into English? and add column
