@@ -1,1 +1,3 @@
+# decompile applescript's before checking them in
+# https://stackoverflow.com/questions/7641806/how-would-you-put-an-applescript-script-under-version-control
 *.scpt filter=ascr

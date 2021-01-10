@@ -6,17 +6,6 @@ set DEBUG to false
 -- load global variables
 set globalVars to (load script "/Users/vinceluk/Dropbox/projects/btt/scpt/global-vars.scpt")
 
-(*
-set COLOR_WHITE to "255, 255, 255, 255"
-set COLOR_BLACK to "0, 0, 0, 255"
-set COLOR_GREEN to "0, 228, 0, 255"
-set COLOR_YELLOW to "255,255,0, 255"
-set COLOR_ORANGE to "255, 153, 51, 255"
-set COLOR_RED to "255, 102, 102, 255"
-set COLOR_PURPLE to "255, 0, 255, 255"
-set COLOR_MAROON to "204, 0, 102, 255"
-set ICON_PATH to "\\/Users\\/vinceluk\\/Dropbox\\/software\\/BTT-configurations\\/icons\\/"
-*)
 
 set COUNTRY_DEFAULT to "THA"
 
