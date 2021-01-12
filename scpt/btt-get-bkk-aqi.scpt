@@ -22,7 +22,9 @@ set DEBUG to false
 
 
 -- read global variables
-set globalVars to (load script "/Users/vinceluk/Dropbox/projects/btt/scpt/global-vars.scpt")
+set home_path to POSIX path of (path to home folder as string)
+set globalVars to (load script home_path & "/Dropbox/projects/btt/scpt/global-vars.scpt")
+
 
 if DEBUG is true then
 	set script_output to 125

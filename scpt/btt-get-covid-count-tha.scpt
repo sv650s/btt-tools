@@ -1,7 +1,12 @@
 set DEBUG to false
+set DISPLAY_TWO_COLUMNS to false
 
 -- read global variables
-set globalVars to (load script "/Users/vinceluk/Dropbox/projects/btt/scpt/global-vars.scpt")
+-- get home path and translate to POSIX format so we can use this across different users
+set home_path to POSIX path of (path to home folder as string)
+set globalVars to (load script home_path & "/Dropbox/projects/btt/scpt/global-vars.scpt")
+
+-- set globalVars to (load script "/Users/vinceluk/Dropbox/projects/btt/scpt/global-vars.scpt")
 
 
 -- today has to be less than this threshold compared to yesterday before we use green
@@ -21,17 +26,31 @@ tell application "BetterTouchTool"
 	* yesterday's new case count for BKK provence
 	*)
 	if DEBUG is false then
-		set th_data to (do shell script "source ~/.bash_profile && cd ~/Dropbox/projects/btt && conda run -n btt python get_covid_daily_data.py COUNTRY Thailand --source th-data")
+		if DISPLAY_TWO_COLUMNS is true then
+			set th_data to (do shell script "source ~/.bash_profile && cd ~/Dropbox/projects/btt && conda run -n btt python get_covid_daily_data.py COUNTRY Thailand --source th-data")
+		else
+			set th_data to (do shell script "source ~/.bash_profile && cd ~/Dropbox/projects/btt && conda run -n btt python get_covid_daily_data.py COUNTRY Thailand")
+		end if
 	else
-		set th_data to "N/A|N/A|205|46"
-		-- set th_data to "215|32|205|46"
+		if DISPLAY_TWO_COLUMNS is true then
+
+			set th_data to "N/A|N/A|205|46"
+			-- set th_data to "215|32|205|46"
+		else
+			set th_data to "205|46"
+		end if
 	end if
 
 	set output_lines to my splitLine(th_data, "|")
-	set todayCountTHA to item 1 of output_lines
-	set todayCountBKK to item 2 of output_lines
-	set ydaCountTHA to item 3 of output_lines
-	set ydaCountBKK to item 4 of output_lines
+	if DISPLAY_TWO_COLUMNS is true then
+		set todayCountTHA to item 1 of output_lines
+		set todayCountBKK to item 2 of output_lines
+		set ydaCountTHA to item 3 of output_lines
+		set ydaCountBKK to item 4 of output_lines
+	else
+		set todayCountTHA to item 1 of output_lines
+		set ydaCountTHA to item 2 of output_lines
+	end if
 
 	log "todayCountTHA:" & todayCountTHA
 	log "ydaCountTHA:" & ydaCountTHA
@@ -49,7 +68,9 @@ tell application "BetterTouchTool"
 		log "displaying today's data"
 		-- set this so we can derive color tomorrow when it's N/A
 		set_persistent_string_variable "VLCoronaVirusCountryYDACountTHA" to ydaCountTHA
-		set_persistent_string_variable "VLCoronaVirusCountryYDACountBKK" to ydaCountBKK
+		if DISPLAY_TWO_COLUMNS is true then
+			set_persistent_string_variable "VLCoronaVirusCountryYDACountBKK" to ydaCountBKK
+		end if
 
 		set diff to todayCountTHA - ydaCountTHA as number
 
@@ -64,38 +85,44 @@ tell application "BetterTouchTool"
 		end if
 
 
-		-- old way - just show today data
-		--		set jsonOutput to "{\"text\": \"2DA: " & todayCountTHA & "\\nBKK: " & todayCountBKK & "\",
-		set jsonOutput to "{\"text\": \"2DA: " & todayCountTHA & "\\t" & ydaCountTHA & "\\nBKK: " & todayCountBKK & "\\t" & ydaCountBKK & "\",
-\"background_color\": \"" & background_color & "\",
-\"font_color\": \"" & fontColor & "\"}"
+		if DISPLAY_TWO_COLUMNS is true then
+			set displayText to "2DA: " & todayCountTHA & "\\t" & ydaCountTHA & "\\nBKK:        " & todayCountBKK & "\\t" & ydaCountBKK
+		else
+			set displayText to "2DA: " & todayCountTHA & "\\nYDA:        " & ydaCountTHA
+		end if
 
 
 	else
 		log "today's data not available, display yesterday's data"
 		-- display yesterday's data
 		set dayBeforeCountTHA to get_string_variable "VLCoronaVirusCountryYDACountTHA"
-		set dayBeforeCountBKK to get_string_variable "VLCoronaVirusCountryYDACountBKK"
-		-- we may not have this value the first time you run
-		if dayBeforeCountBKK is missing value then
-			set dayBeforeCountBKK to "N/A"
+		log "dayBeforeCountTHA: " & dayBeforeCountTHA
+
+		if DISPLAY_TWO_COLUMNS is true then
+			set dayBeforeCountBKK to get_string_variable "VLCoronaVirusCountryYDACountBKK"
+			-- we may not have this value the first time you run
+			if dayBeforeCountBKK is missing value then
+				set dayBeforeCountBKK to "N/A"
+			end if
+			log "dayBeforeCountBKK: " & dayBeforeCountBKK
 		end if
 
-		log "dayBeforeCountTHA: " & dayBeforeCountTHA
-		log "dayBeforeCountBKK: " & dayBeforeCountBKK
 
 		-- displaying yesterday's data - let's use grey
 		set fontColor to (the COLOR_GREY of globalVars)
 
-		-- old way - just show today data
-		-- set jsonOutput to "{\"text\": \"YDA: " & ydaCountTHA & "\\nBKK: " & ydaCountBKK & "\",
-		set jsonOutput to "{\"text\": \"YDA: " & ydaCountTHA & "\\t" & dayBeforeCountTHA & "\\nBKK: " & ydaCountBKK & "\\t" & dayBeforeCountBKK & "\",
-\"background_color\": \"" & background_color & "\",
-\"font_color\": \"" & fontColor & "\"}"
+		if DISPLAY_TWO_COLUMNS is true then
+			set displayText to "YDA: " & ydaCountTHA & "\\t" & dayBeforeCountTHA & "\\nBKK:        " & ydaCountBKK & "\\t" & dayBeforeCountBKK
+		else
+			set displayText to "YDA: " & ydaCountTHA & "\\nYDA:        " & ydaCountTHA
+		end if
 
 	end if
 
-	return jsonOutput
+	return "{\"text\": \"" & displayText & "\",
+\"background_color\": \"" & background_color & "\",
+\"font_color\": \"" & fontColor & "\"}"
+
 
 end tell
 

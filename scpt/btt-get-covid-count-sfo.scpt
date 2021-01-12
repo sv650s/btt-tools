@@ -1,7 +1,9 @@
 set DEBUG to false
 
 -- read global variables
-set globalVars to (load script "/Users/vinceluk/Dropbox/projects/btt/scpt/global-vars.scpt")
+set home_path to POSIX path of (path to home folder as string)
+set globalVars to (load script home_path & "/Dropbox/projects/btt/scpt/global-vars.scpt")
+
 
 set THRESHOLD to 50
 
@@ -63,7 +65,7 @@ tell application "BetterTouchTool"
 		end if
 
 
-		set output to "{\"text\": \"YDA: " & yda_count & "\\nDBY: " & dayBeforeCount & "\",
+		set output to "{\"text\": \"YDA: " & yda_count & "\\nDBY:       " & dayBeforeCount & "\",
 \"background_color\": \"" & background_color & "\",
 \"font_color\": \"" & font_color & "\"}"
 

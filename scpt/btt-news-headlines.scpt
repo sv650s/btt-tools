@@ -25,11 +25,9 @@ set ICON_TC to "TC.png"
 set ICON_YHOO to "YHOO.ico"
 
 
-
-set globalVars to (load script "/Users/vinceluk/Dropbox/projects/btt/scpt/global-vars.scpt")
-
-
-
+-- load global variables
+set home_path to POSIX path of (path to home folder as string)
+set globalVars to (load script home_path & "/Dropbox/projects/btt/scpt/global-vars.scpt")
 
 tell application "BetterTouchTool"
 
