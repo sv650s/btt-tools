@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Get articles from various sources')
+    parser = argparse.ArgumentParser(description='Get data from various sources')
     parser.add_argument('--article_num', metavar='Article Number', type=int, default=1, required=True,
                         help='Which a to display')
     parser.add_argument('--log_level', default="ERROR", help='Specify logging level. Default ERROR')
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                   "news.yahoo.com")
         ]
     formatter = RSSFormatter()
-    # list of list of articles from all sources
+    # list of list of data from all sources
     master_articles = {}
 
     max_articles_length = 0
@@ -94,7 +94,7 @@ if __name__ == "__main__":
             log.debug(f'{count} adding: {formatter.format(a)}')
         count += 1
 
-    log.debug(f'total aggregated articles: {len(formatted_articles)}')
+    log.debug(f'total aggregated data: {len(formatted_articles)}')
     log.debug(f'{formatted_articles}')
 
     # get right article and print to output

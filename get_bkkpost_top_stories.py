@@ -29,11 +29,11 @@ if __name__ == "__main__":
     try:
         articles = parser.get()
 
-        log.debug(f'articles length: {len(articles)}')
+        log.debug(f'data length: {len(articles)}')
         if len(articles) > 0:
             print(formatter.format(articles[article_num % len(articles)]), end='')
         else:
-            print("No articles found", end='')
+            print("No data found", end='')
 
     except Exception as e:
         print(f"BKK Error {e}")

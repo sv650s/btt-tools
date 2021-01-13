@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import abc
 import logging
 import requests
+from util.datasource import DataFormatter
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ class Article:
                   f'\tlink: {self.link}\n'
                 f'\tpublishDate: {self.publishDate}')
 
-class ArticleFormatter(metaclass=abc.ABCMeta):
+class ArticleFormatter(DataFormatter):
 
     def __init__(self,
                  include_headline = True,
@@ -59,6 +60,7 @@ class PipeArticleFormatter(ArticleFormatter):
 
         return output
 
+# TODO: implement ExternalDataSource
 class WebParser(metaclass=abc.ABCMeta):
 
     def __init__(self):
@@ -97,11 +99,13 @@ class WebParser(metaclass=abc.ABCMeta):
 
 
 
+    # TODO: make data required instead of using object variable
     @abc.abstractmethod
-    def parse_list_from_page(self) -> list:
+    def parse_data(self, data=None) -> list:
         """
         parses arts once we have the soup object
 
+        :param data:
         :param article_number:
         :return: a list of arts
         """
@@ -120,13 +124,14 @@ class WebParser(metaclass=abc.ABCMeta):
     def get(self) -> list:
         """
 
-        :return: list of articles from source
+        :return: list of data from source
         """
         response = requests.get(self.get_url())
         response.content.decode('utf-8')
         self.soup = BeautifulSoup(response.text, 'lxml')
 
-        return self.parse_list_from_page()
+        # TODO: ues formatter
+        return self.parse_data()
 
     def new_article(self):
         """
@@ -149,7 +154,7 @@ class BKKPostParser(WebParser):
     def get_source(self) -> str:
         return "BKK"
 
-    def parse_list_from_page(self) -> list:
+    def parse_data(self, data=None) -> list:
         articles = []
 
         # get top story
@@ -204,7 +209,7 @@ class SFGateParser(WebParser):
     def get_source(self) -> str:
         return "SFGate"
 
-    def parse_list_from_page(self) -> list:
+    def parse_data(self, data=None) -> list:
         articles = []
         spotlights = self.soup.find_all(attrs={"class": "dynamicSpotlight--item-header hdn-analytics"}, href=True)
 
@@ -234,7 +239,7 @@ class AQICNParser(WebParser):
     def get_source(self) -> str:
         return "AQICN"
 
-    def parse_list_from_page(self) -> list:
+    def parse_data(self, data=None) -> list:
         aqi_number = self.soup.find(attrs={"class": 'aqivalue'}).get_text()
         aqi_info = self.soup.find(attrs={"id": 'aqiwgtinfo'}).get_text()
         a = Article(self.get_source(),
@@ -266,7 +271,7 @@ class BBCWorldNewsParser(WebParser):
     def get_source(self) -> str:
         return "BBC"
 
-    def parse_list_from_page(self) -> list:
+    def parse_data(self, data=None) -> list:
         articles = []
 
         # get top story
@@ -285,7 +290,7 @@ class BBCWorldNewsParser(WebParser):
         log.debug(f'Top news story: {articles[0]}')
 
 
-        # get other articles
+        # get other data
         other_news_block = self.soup.find(attrs={"class":
                                    "gel-layout gel-layout--equal"})
 

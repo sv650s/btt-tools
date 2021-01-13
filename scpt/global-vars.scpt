@@ -17,6 +17,10 @@ property COLOR_PURPLE : "255, 0, 255, 255"
 property COLOR_MAROON : "204, 0, 102, 255"
 property COLOR_GREY : "190, 190, 190, 255"
 
-property ICON_PATH : "\\/Users\\/vinceluk\\/Dropbox\\/projects\\/btt\\/icons\\/"
+-- TODO: might need to double escapte this path
+property home_path : POSIX path of (path to home folder as string)
+property ICON_PATH : home_path & "\\/Dropbox\\/projects\\/btt\\/icons\\/"
+-- old hard coded path
+-- property ICON_PATH : home_path & "\\/Users\\/vinceluk\\/Dropbox\\/projects\\/btt\\/icons\\/"
 
 

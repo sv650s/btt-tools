@@ -14,13 +14,9 @@ to run from BTT:
 
     return do shell script "source ~/.bash_profile && cd ~/Dropbox/projects/COVID && conda run -n covid python get_covid_daily_data.py COUNTRY Thailand"
 """
-#import libraries
-import pandas as pd
-import numpy as np
-import requests, io
 import logging
 import argparse
-from util.datasource import CountryWorldometerSource, CAWorldometerSource, ThailandCovidSource
+from util.htmlparser import CountryWorldometerDataSource, CAWorldometerDataSource, THStatDataSource
 
 from util.htmlparser import HTMLTableParser
 
@@ -52,24 +48,24 @@ if __name__ == "__main__":
     row_filter_value = args.row_filter_value # USA
     default_fill_value = args.default_fill_value
 
-    data_fetcher = None
+    data_source = None
 
     if mode == "COUNTRY":
         if row_filter_value == "Thailand":
             if source == "worldometer":
-                data_fetcher = CountryWorldometerSource(row_filter_value, column_filter, default_fill_value)
+                data_source = CountryWorldometerDataSource(row_filter_value, column_filter, default_fill_value)
             else:
-                data_fetcher = ThailandCovidSource(row_filter=row_filter_value,
-                                                   column_filter=column_filter,
-                                                   default_value = default_fill_value)
+                data_source = THStatDataSource(row_filter=row_filter_value,
+                                               column_filter=column_filter,
+                                               default_value = default_fill_value)
         else:
-            data_fetcher = CountryWorldometerSource(row_filter_value, column_filter, default_fill_value)
+            data_source = CountryWorldometerDataSource(row_filter_value, column_filter, default_fill_value)
     elif mode == "CA":
-        data_fetcher = CAWorldometerSource(row_filter_value, column_filter, default_fill_value)
+        data_source = CAWorldometerDataSource(row_filter_value, column_filter, default_fill_value)
     else:
         raise Exception("Unknown Mode")
 
-    values = data_fetcher.get_data()
+    values = data_source.get_data()
 
     log.debug(f'values length: {len(values)}')
     output = ""

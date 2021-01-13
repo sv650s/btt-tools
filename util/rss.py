@@ -35,7 +35,7 @@ class RSSFormatter(PipeArticleFormatter):
         return super(RSSFormatter, self).format(a)
 
 
-# TODO: use pubDate to filter out old articles
+# TODO: use pubDate to filter out old data
 class RSSParser(WebParser):
 
     def __init__(self,
@@ -53,7 +53,7 @@ class RSSParser(WebParser):
         :param source: text new source - used to drive icon in BTT
         :param url: url or the article
         :param domain: domain of site - used to prevent BTT from opening too many tabs
-        :param limit: limits # of articles per source
+        :param limit: limits # of data per source
         :param headline_field: field in XML to get headline info
         :param summary_field: field in XML to get summary
         :param link_field: field in XML to get link
@@ -79,12 +79,12 @@ class RSSParser(WebParser):
 
     def get(self) -> list:
         """
-        :return: list of articles from source
+        :return: list of data from source
         """
         response = requests.get(self.get_url())
         data = response.content.decode('utf-8')
         self.root = ET.fromstring(data)
-        return self.parse_list_from_page()
+        return self.parse_data()
 
     def get_url(self):
         return self.url
@@ -96,10 +96,11 @@ class RSSParser(WebParser):
         return self.source
 
 
-    def parse_list_from_page(self) -> list:
+    def parse_data(self, data=None) -> list:
         """
         parses arts once we have the soup object
 
+        :param data:
         :param article_number:
         :return: a list of arts
         """
