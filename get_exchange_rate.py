@@ -10,10 +10,19 @@ http://api.openrates.io/2000-01-03
 """
 import logging
 import argparse
-from util.json import ExchangeRatesParser, JSONDataSource, ExchangeRateFormatter
+# from util.json import ExchangeRatesParser, JSONDataSource, ExchangeRateFormatter
+from util.webparser import ExchangeRatesHTMLDataSource, Article
+from util.datasource import DataFormatter
 
 
 log = logging.getLogger(__name__)
+
+
+class ExchangeRatesOrgFormatter(DataFormatter):
+
+    def format(self, data: Article, **kwargs) -> str:
+        return data.headline
+
 
 
 if __name__ == "__main__":
@@ -40,21 +49,27 @@ if __name__ == "__main__":
     # TODO: update call to use symbols
     # https://api.exchangeratesapi.io/latest?base=USD&symbols=USD,THB,GBP
     # f"https://api.openrates.io/latest?base={base_currency}",
-    source = JSONDataSource(
-        f"https://api.exchangeratesapi.io/latest?base={base_currency}",
-        ExchangeRatesParser(target_currency)
-    )
-    formatter = ExchangeRateFormatter()
+    # source = JSONDataSource(
+    #     f"https://api.exchangeratesapi.io/latest?base={base_currency}",
+    #     ExchangeRatesParser(target_currency)
+    # )
+    # formatter = ExchangeRateFormatter()
 
-    # try:
-    # TODO: implement filter list for the future
-    data = source.get_data()
+    # # try:
+    # # TODO: implement filter list for the future
+    # data = source.get_data()
+    #
+    # log.debug(f'data length: {len(data)}')
+    # if len(data) > 0:
+    #     print(formatter.format(data[0]), end='')
+    # else:
+    #     print("No data found", end='')
 
-    log.debug(f'data length: {len(data)}')
-    if len(data) > 0:
-        print(formatter.format(data[0]), end='')
-    else:
-        print("No data found", end='')
+    source = ExchangeRatesHTMLDataSource()
+    formatter = ExchangeRatesOrgFormatter()
+    lst = source.get()
+    log.debug(f'list: {lst}')
+    print(formatter.format(lst[0]), end='')
 
     # except Exception as e:
     #     print(f"Exchange Rate Error {e}")

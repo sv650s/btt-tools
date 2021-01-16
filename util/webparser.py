@@ -330,3 +330,38 @@ class BBCWorldNewsParser(WebParser):
         :return:
         """
         return f'http://www.bbc.com{new_link}'
+
+
+class ExchangeRatesHTMLDataSource(WebParser):
+
+    def get_url(self):
+        return "https://www.exchangerates.org.uk/Dollars-to-Baht-currency-conversion-page.html"
+
+
+
+    def get_domain(self):
+        return "exchangerates.org"
+
+
+    def get_source(self) -> str:
+        return "EXRT"
+
+
+    def parse_data(self, data=None) -> list:
+        rate = self.soup.find('span', attrs={"id": 'shd2b;'}).get_text()
+        a = Article(self.get_source(),
+                    headline=rate)
+        log.debug(f'a: {a}')
+        return [a]
+
+
+    def format(self, a: Article, **kwargs) -> str:
+        # output for BTT
+        # "{\"text\":\"newTitle\",
+        # \"icon_data\": \"base64_icon_data\",
+        # \"icon_path\":\"path_to_new_icon\",
+        # \"background_color\": \"255,85,100,255\",
+        # \"font_color\": \"100,200,100,255\",
+        # \"font_size\": 10}"
+
+        return f'{a.headline}'
