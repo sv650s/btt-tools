@@ -23,6 +23,8 @@ if __name__ == "__main__":
                            help='Bsse currency to get rates on')
     argparser.add_argument('--target_currency', metavar='Target Currency', type=str, default="THB",
                            help='Target currenty to convert to')
+    argparser.add_argument('--history_days', metavar='Historical Data (Days)', type=str, default=30,
+                           help='How far back to get historical data')
     argparser.add_argument('--log_level', default="ERROR", help='Specify logging level. Default ERROR')
     args = argparser.parse_args()
 
@@ -33,12 +35,13 @@ if __name__ == "__main__":
 
     base_currency = args.base_currency
     target_currency = args.target_currency
+    history_days = args.history_days
 
-        # f"https://api.exchangeratesapi.io/latest?base={base_currency}",
     # TODO: update call to use symbols
     # https://api.exchangeratesapi.io/latest?base=USD&symbols=USD,THB,GBP
+    # f"https://api.openrates.io/latest?base={base_currency}",
     source = JSONDataSource(
-        f"https://api.openrates.io/latest?base={base_currency}",
+        f"https://api.exchangeratesapi.io/latest?base={base_currency}",
         ExchangeRatesParser(target_currency)
     )
     formatter = ExchangeRateFormatter()

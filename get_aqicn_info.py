@@ -26,11 +26,18 @@ if __name__ == "__main__":
         logging.basicConfig(level=log_level)
         log = logging.getLogger(__name__)
 
-        parser = AQICNParser()
+        parser = AQICNParser("http://aqicn.org/city/thailand/bangkok/chulalongkorn-hospital")
         arts = parser.get()
 
         log.debug(f'a count: {len(arts)}')
         log.debug(f'arts: {arts}')
+
+        # TODO: move this into AQICN Parser class??
+        if parser.format(arts[0]) == "-":
+            # sometimes chulalongkorn hospital returns no data - get it from Bangkok
+            log.debug("Got no data from chulalongkorn-hospital")
+            parser = AQICNParser("https://aqicn.org/city/bangkok/")
+            arts = parser.get()
 
         print(parser.format(arts[0]), end="")
     except Exception as e:

@@ -11,7 +11,7 @@ Uses the following variables:
 *)
 -- constants
 set DEBUG to false
-set MAX_FIRST_LINE_WORDS to 8
+set MAX_FIRST_LINE_WORDS to 7
 -- maximum number of words we will put into output
 set MAX_OUTPUT_WORDS to 25
 

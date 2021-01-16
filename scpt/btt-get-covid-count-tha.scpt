@@ -1,5 +1,7 @@
 set DEBUG to false
 set DISPLAY_TWO_COLUMNS to false
+-- three letter country code
+set CURRENT_COUNTRY to "THA"
 
 -- read global variables
 -- get home path and translate to POSIX format so we can use this across different users
@@ -16,7 +18,8 @@ set THRESHOLD to 50
 
 -- we still have to tell the group what data to pull
 tell application "BetterTouchTool"
-	set_persistent_string_variable "CoronaVirusCountry" to "THA"
+	set_persistent_string_variable "CoronaVirusCountry" to CURRENT_COUNTRY
+	-- 	set_persistent_string_variable "CoronaVirusCountry" to "THA"
 
 	(*
 	output has 4 things
@@ -88,14 +91,17 @@ tell application "BetterTouchTool"
 		if DISPLAY_TWO_COLUMNS is true then
 			set displayText to "2DA: " & todayCountTHA & "\\t" & ydaCountTHA & "\\nBKK:        " & todayCountBKK & "\\t" & ydaCountBKK
 		else
-			set displayText to "2DA: " & todayCountTHA & "\\nYDA:        " & ydaCountTHA
+			set displayText to "2DA: " & todayCountTHA & "\\nYDA: " & ydaCountTHA
 		end if
 
 
 	else
 		log "today's data not available, display yesterday's data"
-		-- display yesterday's data
+		-- day before yesterday's count was stored in VLCoronaVirusCountryYDACountTHA
 		set dayBeforeCountTHA to get_string_variable "VLCoronaVirusCountryYDACountTHA"
+		if dayBeforeCountTHA is missing value then
+			set dayBeforeCountTHA to "N/A"
+		end if
 		log "dayBeforeCountTHA: " & dayBeforeCountTHA
 
 		if DISPLAY_TWO_COLUMNS is true then
@@ -114,7 +120,7 @@ tell application "BetterTouchTool"
 		if DISPLAY_TWO_COLUMNS is true then
 			set displayText to "YDA: " & ydaCountTHA & "\\t" & dayBeforeCountTHA & "\\nBKK:        " & ydaCountBKK & "\\t" & dayBeforeCountBKK
 		else
-			set displayText to "YDA: " & ydaCountTHA & "\\nYDA:        " & ydaCountTHA
+			set displayText to "YDA: " & ydaCountTHA & "\\nDBY: " & ydaCountTHA
 		end if
 
 	end if

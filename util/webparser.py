@@ -230,8 +230,13 @@ class SFGateParser(WebParser):
 
 class AQICNParser(WebParser):
 
+    def __init__(self,
+                 url: str):
+        self.url = url
+
     def get_url(self):
-        return "http://aqicn.org/city/thailand/bangkok/chulalongkorn-hospital"
+        # return "http://aqicn.org/city/thailand/bangkok/chulalongkorn-hospital"
+        return self.url
 
     def get_domain(self):
         return "aqicn.org"

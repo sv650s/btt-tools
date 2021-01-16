@@ -65,7 +65,7 @@ tell application "BetterTouchTool"
 		end if
 
 
-		set output to "{\"text\": \"YDA: " & yda_count & "\\nDBY:       " & dayBeforeCount & "\",
+		set output to "{\"text\": \"YDA: " & yda_count & "\\nDBY: " & dayBeforeCount & "\",
 \"background_color\": \"" & background_color & "\",
 \"font_color\": \"" & font_color & "\"}"
 

@@ -48,14 +48,22 @@ class ExchangeRatesParser(DataParser):
 
 class ExchangeRateFormatter(DataFormatter):
 
+    def __init__(self,
+                 precision: int = 3):
+        """
+
+        :param precision: number of precisions to round to. Default 3
+        """
+        self.precision = int(precision)
+
     def format(self, data: str, **kwargs) -> str:
         """
 
         :param data: should be a number of sorts
-        :param kwargs:
-        :return: 2 precision number
+        :return: rounded number to precision specified
         """
-        return str(round(float(data), 2))
+        log.debug(f'precision: {self.precision}')
+        return str(round(float(data), self.precision))
 
 
 
