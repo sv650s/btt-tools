@@ -20,8 +20,16 @@ log = logging.getLogger(__name__)
 
 class ExchangeRatesOrgFormatter(DataFormatter):
 
+    def __init__(self,
+                 precision: int = 3):
+        """
+        Constructor
+        :param precision: Number of precisions to round output
+        """
+        self.precision = precision
+
     def format(self, data: Article, **kwargs) -> str:
-        return data.headline
+        return round(float(data.headline), self.precision)
 
 
 
