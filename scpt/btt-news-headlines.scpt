@@ -11,6 +11,7 @@ Uses the following variables:
 *)
 -- constants
 set DEBUG to false
+-- max number of words in first line
 set MAX_FIRST_LINE_WORDS to 7
 -- maximum number of words we will put into output
 set MAX_OUTPUT_WORDS to 25
@@ -25,9 +26,16 @@ set ICON_TC to "TC.png"
 set ICON_YHOO to "YHOO.ico"
 
 
--- load global variables
-set home_path to POSIX path of (path to home folder as string)
-set globalVars to (load script home_path & "/Dropbox/projects/btt/scpt/global-vars.scpt")
+-- load functions
+tell application "Finder" to set _myPath to container of (path to me) as text
+set gf_path to _myPath & "global-functions.scpt"
+set _globalFns to load script (alias (gf_path))
+
+-- read global variables
+set _globalVars to load script (alias (_myPath & "global-vars.scpt"))
+-- old way of loading
+-- set home_path to POSIX path of (path to home folder as string)
+-- set _globalVars to (load script home_path & "/Dropbox/projects/btt/scpt/global-vars.scpt")
 
 tell application "BetterTouchTool"
 
@@ -58,7 +66,7 @@ tell application "BetterTouchTool"
 	log "scriptOutput: " & scriptOutput
 
 
-	set scriptOutputLines to my splitLine(scriptOutput, "|")
+	set scriptOutputLines to _globalFns's splitLine(scriptOutput, "|")
 	log "scriptOutputLines length: " & length of scriptOutputLines
 
 	set source to item 1 of scriptOutputLines
@@ -73,7 +81,7 @@ tell application "BetterTouchTool"
 	log "link: " & link
 
 	-- truncate summary - some of them can be quite long and BTT shifts things over and looks weird
-	set summary to my truncateString(summary, MAX_OUTPUT_WORDS)
+	set summary to _globalFns's truncateString(summary, MAX_OUTPUT_WORDS)
 
 
 
@@ -94,13 +102,13 @@ tell application "BetterTouchTool"
 	end if
 
 
-	--set formattedSummary to my breakIntoTwoLines(summary, MAX_FIRST_LINE_WORDS)
+	--set formattedSummary to _globalFns's breakIntoTwoLines(summary, MAX_FIRST_LINE_WORDS)
 	if headline is not "" and summary is not "" then
 		set formattedSummary to headline & "\\n" & summary
 	else if headline is "" then
-		set formattedSummary to my breakIntoTwoLines(summary, MAX_FIRST_LINE_WORDS)
+		set formattedSummary to _globalFns's breakIntoTwoLines(summary, MAX_FIRST_LINE_WORDS)
 	else if summary is "" then
-		set formattedSummary to my breakIntoTwoLines(headline, MAX_FIRST_LINE_WORDS)
+		set formattedSummary to _globalFns's breakIntoTwoLines(headline, MAX_FIRST_LINE_WORDS)
 	end if
 
 	if DEBUG is true then
@@ -109,7 +117,7 @@ tell application "BetterTouchTool"
 	end if
 
 	set jsonOutput to "{\"text\":\"" & formattedSummary & "\",
-\"icon_path\":\"" & (the ICON_PATH of globalVars) & icon & "\"}"
+\"icon_path\":\"" & (the ICON_PATH of _globalVars) & icon & "\"}"
 
 	-- set variables in BTT so button click knows what to open
 	set_string_variable "VLNewsCounter" to newsCounter + 1
@@ -147,7 +155,7 @@ end getBTTStringVariable
 
 
 
-
+(*
 on breakIntoTwoLines(summary, firstLineWordCount)
 	log "Formatting summary: " & summary
 	set summary_list to my splitLine(summary, " ")
@@ -209,5 +217,5 @@ on splitLine(theString, theDelimiter)
 	return theArray
 end splitLine
 
-
+*)
 

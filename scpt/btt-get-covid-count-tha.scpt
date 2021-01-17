@@ -3,12 +3,23 @@ set DISPLAY_TWO_COLUMNS to false
 -- three letter country code
 set CURRENT_COUNTRY to "THA"
 
+
+-- load functions
+tell application "Finder" to set _myPath to container of (path to me) as text
+set gf_path to _myPath & "global-functions.scpt"
+set _globalFns to load script (alias (gf_path))
+
+
 -- read global variables
 -- get home path and translate to POSIX format so we can use this across different users
-set home_path to POSIX path of (path to home folder as string)
-set globalVars to (load script home_path & "/Dropbox/projects/btt/scpt/global-vars.scpt")
+set _globalVars to load script (alias (_myPath & "global-vars.scpt"))
+-- this is the old hardcoded way
+-- set home_path to POSIX path of (path to home folder as string)
+-- set _globalVars to (load script home_path & "/Dropbox/projects/btt/scpt/global-vars.scpt")
 
--- set globalVars to (load script "/Users/vinceluk/Dropbox/projects/btt/scpt/global-vars.scpt")
+
+
+-- set _globalVars to (load script "/Users/vinceluk/Dropbox/projects/btt/scpt/global-vars.scpt")
 
 
 -- today has to be less than this threshold compared to yesterday before we use green
@@ -44,7 +55,7 @@ tell application "BetterTouchTool"
 		end if
 	end if
 
-	set output_lines to my splitLine(th_data, "|")
+	set output_lines to my _globalFns's splitLine(th_data, "|")
 	if DISPLAY_TWO_COLUMNS is true then
 		set todayCountTHA to item 1 of output_lines
 		set todayCountBKK to item 2 of output_lines
@@ -58,8 +69,8 @@ tell application "BetterTouchTool"
 	log "todayCountTHA:" & todayCountTHA
 	log "ydaCountTHA:" & ydaCountTHA
 
-	set fontColor to (the COLOR_WHITE of globalVars)
-	set background_color to (the COLOR_BLACK of globalVars)
+	set fontColor to (the COLOR_WHITE of _globalVars)
+	set background_color to (the COLOR_BLACK of _globalVars)
 
 	(*
 	less (green)
@@ -80,11 +91,11 @@ tell application "BetterTouchTool"
 
 
 		if todayCountTHA > ydaCountTHA then
-			set fontColor to (the COLOR_RED of globalVars)
+			set fontColor to (the COLOR_RED of _globalVars)
 		else if todayCountTHA < ydaCountTHA and diff < -1 * THRESHOLD then
-			set fontColor to (the COLOR_GREEN of globalVars)
+			set fontColor to (the COLOR_GREEN of _globalVars)
 		else
-			set fontColor to (the COLOR_YELLOW of globalVars)
+			set fontColor to (the COLOR_YELLOW of _globalVars)
 		end if
 
 
@@ -115,7 +126,7 @@ tell application "BetterTouchTool"
 
 
 		-- displaying yesterday's data - let's use grey
-		set fontColor to (the COLOR_GREY of globalVars)
+		set fontColor to (the COLOR_GREY of _globalVars)
 
 		if DISPLAY_TWO_COLUMNS is true then
 			set displayText to "YDA: " & ydaCountTHA & "\\t" & dayBeforeCountTHA & "\\nBKK:        " & ydaCountBKK & "\\t" & dayBeforeCountBKK
@@ -132,19 +143,4 @@ tell application "BetterTouchTool"
 
 end tell
 
--- implementation of split function
-on splitLine(theString, theDelimiter)
-	-- save delimiters to restore old settings
-	set oldDelimiters to AppleScript's text item delimiters
-	-- set delimiters to delimiter to be used
-	set AppleScript's text item delimiters to theDelimiter
-	-- create the array
-	set theArray to every text item of theString
-	-- restore the old setting
-	set AppleScript's text item delimiters to oldDelimiters
-	-- return the result
-	log "theArray"
-	log theArray
-	return theArray
-end splitLine
 

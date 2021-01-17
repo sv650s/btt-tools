@@ -20,21 +20,5 @@ property COLOR_GREY : "190, 190, 190, 255"
 -- TODO: might need to double escapte this path
 property home_path : POSIX path of (path to home folder as string)
 property ICON_PATH : home_path & "\\/Dropbox\\/projects\\/btt\\/icons\\/"
--- old hard coded path
--- property ICON_PATH : home_path & "\\/Users\\/vinceluk\\/Dropbox\\/projects\\/btt\\/icons\\/"
 
--- implementation of split function
-on splitLine(theString, theDelimiter)
-	-- save delimiters to restore old settings
-	set oldDelimiters to AppleScript's text item delimiters
-	-- set delimiters to delimiter to be used
-	set AppleScript's text item delimiters to theDelimiter
-	-- create the array
-	set theArray to every text item of theString
-	-- restore the old setting
-	set AppleScript's text item delimiters to oldDelimiters
-	-- return the result
-	log "theArray"
-	log theArray
-	return theArray
-end splitLine
+

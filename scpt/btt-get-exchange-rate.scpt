@@ -65,7 +65,8 @@ return "{\"text\": \"AQI: " & script_output & "\\n" & output_description & "\",
 \"font_color\": \"" & font_color & "\"}"
 *)
 
-return "{\"text\": \"" & script_output & "\\nUSD to THB\"}"
+return "{\"text\": \"THB:\\n" & script_output & "\"}"
+-- return "{\"text\": \"" & script_output & "\\nUSD to THB\"}"
 
 
 
