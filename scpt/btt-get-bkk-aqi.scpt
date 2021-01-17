@@ -45,7 +45,7 @@ else if script_output < 151 then
 	-- unhealthy for sensitive groups
 	set background_color to (the COLOR_BLACK of _globalVars)
 	set font_color to (the COLOR_ORANGE of _globalVars)
-	set output_description to "UH for some" -- unhealthy for sensitive groups
+	set output_description to "UH 4 Some" -- unhealthy for sensitive groups
 else if script_output < 201 then
 	-- unhealthy
 	set background_color to (the COLOR_BLACK of _globalVars)
