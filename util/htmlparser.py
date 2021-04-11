@@ -150,10 +150,17 @@ class WorldometerDataSource(ExternalDataSource):
         data = response.content.decode('utf-8')
 
         hp = HTMLTableParser()
+        hp_tables = hp.parse_url(url)
+        tables = []
+        for hp_table in hp_tables:
+            tables.append(hp_table[1])
+        """
         table_today = hp.parse_url(url)[0][1]  # Grabbing the table from the tuple
         table_yesterday = hp.parse_url(url)[1][1]  # Grabbing the table from the tuple
-        tables = [table_today, table_yesterday]
+        table_day_before_yesterday = hp.parse_url(url)[2][1]  # Grabbing the table from the tuple
+        tables = [table_today, table_yesterday, table_day_before_yesterday]
         log.info(table_today.head(10))
+        """
 
         for table in tables:
 
@@ -201,7 +208,7 @@ class WorldometerDataSource(ExternalDataSource):
         :param tables: list of DF. Each DF represents a table on the page
         :return: list of new cases - index 0 is today, index 1 is yesterday
         """
-        log.debug(f'Filtering using row_filter {self.row_filter} column_filter {self.column_filter}')
+        log.debug(f'Filtering tables[{len(tables)}] using row_filter {self.row_filter} column_filter {self.column_filter}')
 
         values = []
         for table in tables:
@@ -276,6 +283,7 @@ class CountryWorldometerDataSource(WorldometerDataSource):
         table.drop(table.tail(8).index, inplace=True)
 
 
+# This turns out not to be a reliable source - it only updates maybe once a week
 class THStatDataSource(ExternalDataSource):
     # TODO: clean this up - this should inherit from JSON
 
@@ -298,7 +306,7 @@ class THStatDataSource(ExternalDataSource):
 
     def get_data(self, **kwargs) -> list:
         # get homepage
-        url = ' https://covid19.th-stat.com/api/open/cases'
+        url = 'https://covid19.th-stat.com/api/open/cases'
         response = requests.get(url)
         data = response.content.decode('utf-8')
 

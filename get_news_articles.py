@@ -15,8 +15,8 @@ log = logging.getLogger(__name__)
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Get data from various sources')
-    parser.add_argument('--article_num', metavar='Article Number', type=int, default=1, required=True,
-                        help='Which a to display')
+    parser.add_argument('--article_num', metavar='Article Number', type=int, default=1,
+                        help='Which article to display. Must be >= 1. Numbers below that will be set to 1')
     parser.add_argument('--log_level', default="ERROR", help='Specify logging level. Default ERROR')
     args = parser.parse_args()
 
@@ -24,8 +24,7 @@ if __name__ == "__main__":
 
     # parameter validation
     if article_num < 1:
-        print("ERROR: article_num must be > 0")
-        exit(1)
+        article_num = 1
 
     if args.log_level is not None:
         log_level = getattr(logging, args.log_level.upper(), None)
@@ -38,24 +37,40 @@ if __name__ == "__main__":
         RSSParser("BKK",
                   "https://www.bangkokpost.com/rss/data/topstories.xml",
                   "bangkokpost.com"),
+        RSSParser("BKK",
+                  "https://www.bangkokpost.com/rss/data/most-recent.xml",
+                  "bangkokpost.com"),
         RSSParser("BBC",
+                  "http://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml",
+                  "bbc.com"),
+        RSSParser("BBC-World",
                   "http://feeds.bbci.co.uk/news/video_and_audio/world/rss.xml",
                   "bbc.com"),
-        RSSParser(
-                  "NYT",
+        # CNN Top Stories
+        RSSParser("CNN",
+                  "http://rss.cnn.com/rss/cnn_topstories.rss",
+                  "cnn.com"),
+        # CNN World News
+        RSSParser("CNN-World",
+                  "http://rss.cnn.com/rss/edition_world.rss",
+                  "cnn.com"),
+        # NYT Home Page
+        RSSParser("NYT",
                   "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
                   "nytimes.com"),
-        RSSParser(
-                  "SFGate",
+        # NYT World News
+        RSSParser("NYT-World",
+                  "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+                  "nytimes.com"),
+        # SF Gate Top News Stories
+        RSSParser("SFGate",
                   "https://www.sfgate.com/bayarea/feed/Bay-Area-News-429.php",
                   "sfgate.com",
                     include_headline = True,
                   include_summary = True),
-        RSSParser(
-            "NPR",
-            "https://feeds.npr.org/510355/podcast.xml",
-            "npr.org"
-        ),
+        RSSParser("NPR",
+                  "https://feeds.npr.org/1001/rss.xml",
+                  "npr.org"),
         RSSParser("TC",
                   "http://feeds.feedburner.com/Techcrunch",
                   "techcrunch.com",
@@ -63,23 +78,29 @@ if __name__ == "__main__":
         RSSParser("YHOO",
                   "https://www.yahoo.com/news/rss",
                   "news.yahoo.com")
+        # TODO: ATOM structure might be different and we might need a new parser
+        # RSSParser("MF",
+        #           "https://martinfowler.com/feed.atom",
+        #           "martinflowler.com")
         ]
     formatter = RSSFormatter()
     # list of list of data from all sources
     master_articles = {}
 
+    # this is max articles per source - we will fill up this number of slots per source later in our master list
     max_articles_length = 0
     for parser in parsers:
         try:
             articles = parser.get()
             max_articles_length = max_articles_length if max_articles_length > len(articles) else len(articles)
+            log.debug(f"max_articles_length: {max_articles_length}")
             master_articles[parser] = articles
         except Exception as e:
             log.debug(f"Error getting from parser: {parser}")
             log.debug(e)
 
 
-    log.debug(f'max_articles_length {max_articles_length}')
+    log.debug(f'max_articles_length: {max_articles_length}')
 
     formatted_articles = []
     # flatten a list
@@ -88,6 +109,7 @@ if __name__ == "__main__":
     while count < max_articles_length:
         for parser in master_articles.keys():
             articles = master_articles[parser]
+            log.debug(f"len(articles) {len(articles)} count {count}")
             idx = count % len(articles)
             a = articles[idx]
             formatted_articles.append(formatter.format(a))
