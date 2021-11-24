@@ -31,7 +31,7 @@ if __name__ == "__main__":
     parser.add_argument('--column_filter', metavar='Column filter', type=str, default='newcases',
                         help='What column do you want to get the data -ie, newcases')
     parser.add_argument('--source', metavar='Data Source', type=str, default='worldometer',
-                        help='What source to get the data: worldometer, th-stat')
+                        help='What source to get the data. supported: worldometer, th-stat')
     parser.add_argument('--log_level', default="ERROR", help='Specify logging level. Default ERROR')
     parser.add_argument('--default_fill_value', metavar="Default Fill Value", default='N/A', type=str,
                         help='Replace blank columns with this. Default: N/A')
